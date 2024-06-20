@@ -55,11 +55,11 @@ export const getUser = async (req, res, next) => {
 export const updateUser = async (req, res, next) => {
   try {
     const { id } = req.params;
-    const { nombre, password, tipo_usuario } = req.body;
+    const { id_rol, nombre, password } = req.body;
 
     const result = await pool.query(
-      `UPDATE usuario SET nombre = $1, password = $2, tipo_usuario = $3 WHERE id_usuario = $4 RETURNING *`,
-      [nombre, password, tipo_usuario, id]
+      `UPDATE usuario SET id_rol = $1, nombre_usuario = $2, clave_usuario = $3 WHERE id_usuario = $4 RETURNING *`,
+      [id_rol, nombre, password, id]
     );
 
     if (result.rows.length === 0)
@@ -93,9 +93,10 @@ export const login = async (req, res) => {
     const { nombre, password } = req.body;
 
     // Buscar el usuario en la base de datos por nombre de usuario
-    const result = await pool.query(`SELECT * FROM usuario WHERE nombre = $1`, [
-      nombre
-    ]);
+    const result = await pool.query(
+      `SELECT * FROM usuario WHERE nombre_usuario = $1`,
+      [nombre]
+    );
 
     // Si no se encuentra el usuario
     if (result.rows.length === 0) {

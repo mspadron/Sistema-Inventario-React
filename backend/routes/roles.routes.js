@@ -10,6 +10,6 @@ import {
 const router = Router();
 
 router.route('/').get(getAllRoles).post(createRol);
-router.route('/:id_rol').get(getRol).put(updateRol).delete(deleteRol);
+router.route('/:id').get(getRol).put(updateRol).delete(deleteRol);
 
 export default router;
