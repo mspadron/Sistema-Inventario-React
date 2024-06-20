@@ -10,8 +10,8 @@ import {
 } from '@mui/material';
 import {
   Person as UserIcon,
-  Business as ClientIcon,
-  Description as PolicyIcon,
+  Store as StoreIcon,
+  Inventory as InventoryIcon,
   Payment as PaymentIcon,
   Close as CloseIcon,
   Home as HomeIcon
@@ -65,18 +65,18 @@ const Navbar = () => {
 
     if (tipoUsuario === 'Administrador') {
       menuItems.push(
-        { text: 'Inicio', icon: <HomeIcon />, link: '/incompleto' },
-        { text: 'Usuarios', icon: <UserIcon />, link: '/incompleto' },
-        { text: 'Clientes', icon: <ClientIcon />, link: '/incompleto' },
-        { text: 'Polizas', icon: <PolicyIcon />, link: '/incompleto' },
-        { text: 'Pagos', icon: <PaymentIcon />, link: '/incompleto' }
+        { text: 'Dashboard', icon: <HomeIcon />, link: '/incompleto' },
+        { text: 'Proveedores', icon: <StoreIcon />, link: '/incompleto' },
+        { text: 'Productos', icon: <InventoryIcon />, link: '/incompleto' },
+        { text: 'Existencias', icon: <PaymentIcon />, link: '/incompleto' },
+        { text: 'Usuarios', icon: <UserIcon />, link: '/incompleto' }
       );
-    } else if (tipoUsuario === 'Agente') {
+    } else if (tipoUsuario === 'Bodega') {
       menuItems.push(
-        { text: 'Inicio', icon: <HomeIcon />, link: '/incompleto' },
-        { text: 'Clientes', icon: <ClientIcon />, link: '/incompleto' },
-        { text: 'Polizas', icon: <PolicyIcon />, link: '/incompleto' },
-        { text: 'Pagos', icon: <PaymentIcon />, link: '/incompleto' }
+        { text: 'Dashboard', icon: <HomeIcon />, link: '/incompleto' },
+        { text: 'Proveedores', icon: <StoreIcon />, link: '/incompleto' },
+        { text: 'Productos', icon: <InventoryIcon />, link: '/incompleto' },
+        { text: 'Existencias', icon: <PaymentIcon />, link: '/incompleto' }
       );
     }
 
