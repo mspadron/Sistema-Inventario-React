@@ -45,7 +45,7 @@ const Navbar = () => {
     const menuItems = [];
 
     /*
-    if (tipoUsuario === 'Administrador') {
+    if (tipoUsuario === 1) {
       menuItems.push(
         { text: 'Inicio', icon: <HomeIcon />, link: '/principal' },
         { text: 'Usuarios', icon: <UserIcon />, link: '/dashUser' },
@@ -63,7 +63,7 @@ const Navbar = () => {
     }
     */
 
-    if (tipoUsuario === 'Administrador') {
+    if (tipoUsuario === '1') {
       menuItems.push(
         { text: 'Dashboard', icon: <HomeIcon />, link: '/incompleto' },
         { text: 'Proveedores', icon: <StoreIcon />, link: '/incompleto' },
@@ -71,7 +71,7 @@ const Navbar = () => {
         { text: 'Existencias', icon: <PaymentIcon />, link: '/incompleto' },
         { text: 'Usuarios', icon: <UserIcon />, link: '/incompleto' }
       );
-    } else if (tipoUsuario === 'Bodega') {
+    } else if (tipoUsuario === '2') {
       menuItems.push(
         { text: 'Dashboard', icon: <HomeIcon />, link: '/incompleto' },
         { text: 'Proveedores', icon: <StoreIcon />, link: '/incompleto' },

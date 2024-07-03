@@ -105,7 +105,7 @@ export const login = async (req, res) => {
 
     // Verificar la contraseña utilizando bcrypt
     const user = result.rows[0];
-    const isValidPassword = await bcrypt.compare(password, user.password);
+    const isValidPassword = await bcrypt.compare(password, user.clave_usuario);
 
     // Si la contraseña no es válida
     if (!isValidPassword) {
@@ -114,7 +114,7 @@ export const login = async (req, res) => {
 
     // Generar un token JWT con el ID del usuario, el tipo de usuario y la clave secreta
     const token = jwt.sign(
-      { id: user.id_usuario, tipo_usuario: user.tipo_usuario },
+      { id: user.id_usuario, tipo_usuario: user.id_rol },
       'your-secret-key'
     );
 
@@ -122,7 +122,7 @@ export const login = async (req, res) => {
     res.status(200).json({
       token,
       usuarioId: user.id_usuario,
-      tipoUsuario: user.tipo_usuario
+      tipoUsuario: user.id_rol
     });
   } catch (error) {
     res.status(500).json({ message: error.message });
