@@ -2,7 +2,7 @@ import { pool } from '../db.js';
 
 export const createExistencia = async (req, res, next) => {
   try {
-    const { stockinicial_existencia, stockactual_existencia, preciocompra_existencia, precioventa_existencia, id_producto } = req.body;
+    const { stockinicial_existencia, stockactual_existencia, preciocompra_existencia, precioventa_existencia, id_producto, id_proveedor, id_usuario } = req.body;
 
     // Crear la nueva existencia
     const newExistencia = await pool.query(
@@ -18,6 +18,18 @@ export const createExistencia = async (req, res, next) => {
       [id_existencia, id_producto]
     );
 
+    // Actualizar el campo id_existencia en la tabla proveedor
+    await pool.query(
+      'UPDATE proveedor SET id_existencia = $1 WHERE id_proveedor = $2',
+      [id_existencia, id_proveedor]
+    );
+
+    // Crear relación en la tabla gestiona
+    await pool.query(
+      'INSERT INTO gestiona (id_usuario, id_existencia) VALUES ($1, $2)',
+      [id_usuario, id_existencia]
+    );
+
     res.json(newExistencia.rows[0]);
   } catch (error) {
     next(error);
@@ -26,7 +38,31 @@ export const createExistencia = async (req, res, next) => {
 
 export const getAllExistencias = async (req, res, next) => {
   try {
-    const allExistencias = await pool.query('SELECT * FROM existencia');
+    const query = `
+      SELECT 
+          e.id_existencia, 
+          e.stockinicial_existencia, 
+          e.stockactual_existencia, 
+          e.preciocompra_existencia, 
+          e.precioventa_existencia, 
+          p.nombre_producto, 
+          c.nombre_categoria, 
+          pr.nombre_proveedor, 
+          u.nombre_usuario AS gestionada_por
+      FROM 
+          existencia e
+      JOIN 
+          producto p ON e.id_existencia = p.id_existencia
+      JOIN 
+          categoria c ON p.id_categoria = c.id_categoria
+      LEFT JOIN 
+          proveedor pr ON e.id_existencia = pr.id_existencia
+      LEFT JOIN 
+          gestiona g ON e.id_existencia = g.id_existencia
+      LEFT JOIN 
+          usuario u ON g.id_usuario = u.id_usuario;
+    `;
+    const allExistencias = await pool.query(query);
     res.json(allExistencias.rows);
   } catch (error) {
     next(error);
@@ -70,6 +106,12 @@ export const deleteExistencia = async (req, res, next) => {
 
     // Eliminar el campo id_existencia en la tabla producto
     await pool.query('UPDATE producto SET id_existencia = NULL WHERE id_existencia = $1', [id]);
+
+    // Eliminar el campo id_existencia en la tabla proveedor
+    await pool.query('UPDATE proveedor SET id_existencia = NULL WHERE id_existencia = $1', [id]);
+
+    // Eliminar la relación en la tabla gestiona
+    await pool.query('DELETE FROM gestiona WHERE id_existencia = $1', [id]);
 
     const result = await pool.query('DELETE FROM existencia WHERE id_existencia = $1', [id]);
 

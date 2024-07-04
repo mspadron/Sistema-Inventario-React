@@ -4,14 +4,14 @@ import bcrypt from 'bcrypt';
 
 export const createUser = async (req, res, next) => {
   try {
-    const { id_rol, nombre, password } = req.body;
+    const { id_rol, nombre_usuario, clave_usuario } = req.body;
 
     // Hash de la contraseña antes de guardarla en la base de datos
-    const hashedPassword = await bcrypt.hash(password, 10);
+    const hashedPassword = await bcrypt.hash(clave_usuario, 10);
 
     const newUser = await pool.query(
       `INSERT INTO usuario (id_rol, nombre_usuario, clave_usuario) VALUES($1, $2, $3) RETURNING *`,
-      [id_rol, nombre, hashedPassword]
+      [id_rol, nombre_usuario, hashedPassword]
     );
 
     res.json(newUser.rows[0]);
@@ -55,11 +55,11 @@ export const getUser = async (req, res, next) => {
 export const updateUser = async (req, res, next) => {
   try {
     const { id } = req.params;
-    const { id_rol, nombre, password } = req.body;
+    const { id_rol, nombre_usuario, clave_usuario } = req.body;
 
     const result = await pool.query(
       `UPDATE usuario SET id_rol = $1, nombre_usuario = $2, clave_usuario = $3 WHERE id_usuario = $4 RETURNING *`,
-      [id_rol, nombre, password, id]
+      [id_rol, nombre_usuario, clave_usuario, id]
     );
 
     if (result.rows.length === 0)
@@ -90,12 +90,12 @@ export const deleteUser = async (req, res, next) => {
 
 export const login = async (req, res) => {
   try {
-    const { nombre, password } = req.body;
+    const { nombre_usuario, clave_usuario } = req.body;
 
     // Buscar el usuario en la base de datos por nombre de usuario
     const result = await pool.query(
       `SELECT * FROM usuario WHERE nombre_usuario = $1`,
-      [nombre]
+      [nombre_usuario]
     );
 
     // Si no se encuentra el usuario
@@ -105,7 +105,7 @@ export const login = async (req, res) => {
 
     // Verificar la contraseña utilizando bcrypt
     const user = result.rows[0];
-    const isValidPassword = await bcrypt.compare(password, user.clave_usuario);
+    const isValidPassword = await bcrypt.compare(clave_usuario, user.clave_usuario);
 
     // Si la contraseña no es válida
     if (!isValidPassword) {

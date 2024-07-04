@@ -44,32 +44,15 @@ const Navbar = () => {
   const renderMenuItems = () => {
     const menuItems = [];
 
-    /*
-    if (tipoUsuario === 1) {
-      menuItems.push(
-        { text: 'Inicio', icon: <HomeIcon />, link: '/principal' },
-        { text: 'Usuarios', icon: <UserIcon />, link: '/dashUser' },
-        { text: 'Clientes', icon: <ClientIcon />, link: '/dashCliente' },
-        { text: 'Polizas', icon: <PolicyIcon />, link: '/dashPoliza' },
-        { text: 'Pagos', icon: <PaymentIcon />, link: '/dashPago' }
-      );
-    } else if (tipoUsuario === 'Agente') {
-      menuItems.push(
-        { text: 'Inicio', icon: <HomeIcon />, link: '/principal' },
-        { text: 'Clientes', icon: <ClientIcon />, link: '/dashCliente' },
-        { text: 'Polizas', icon: <PolicyIcon />, link: '/dashPoliza' },
-        { text: 'Pagos', icon: <PaymentIcon />, link: '/dashPago' }
-      );
-    }
-    */
-
     if (tipoUsuario === '1') {
       menuItems.push(
         { text: 'Dashboard', icon: <HomeIcon />, link: '/incompleto' },
-        { text: 'Proveedores', icon: <StoreIcon />, link: '/incompleto' },
-        { text: 'Productos', icon: <InventoryIcon />, link: '/incompleto' },
-        { text: 'Existencias', icon: <PaymentIcon />, link: '/incompleto' },
-        { text: 'Usuarios', icon: <UserIcon />, link: '/incompleto' }
+        { text: 'Usuarios', icon: <UserIcon />, link: '/dashUser' },
+        { text: 'Proveedores', icon: <StoreIcon />, link: '/dashProveedor' },
+        { text: 'Categorias', icon: <InventoryIcon />, link: '/dashCategoria' },
+        { text: 'Productos', icon: <InventoryIcon />, link: '/dashProducto' },
+        { text: 'Existencias', icon: <PaymentIcon />, link: '/dashExistencia' }
+        
       );
     } else if (tipoUsuario === '2') {
       menuItems.push(
@@ -115,8 +98,8 @@ const Navbar = () => {
           onClick={handleLogout}
           sx={{
             backgroundColor:
-              hoveredItem === menuItems.length ? '#2c3848' : 'transparent', // Aplicar estilo de hover para el botón de Cerrar Sesión
-            marginTop: 'auto', // Empuja el botón de Cerrar Sesión hacia la parte inferior
+              hoveredItem === menuItems.length ? '#2c3848' : 'transparent', 
+            marginTop: 'auto', 
             '&:hover': {
               backgroundColor: '#2c3848',
               '& .MuiListItemIcon-root': {
@@ -154,9 +137,9 @@ const Navbar = () => {
             boxSizing: 'border-box',
             backgroundColor: '#1A202C',
             color: '#FFF',
-            height: '100vh', // Asegura que el Drawer ocupe toda la altura vertical
+            height: '100vh', 
             top: 0,
-            zIndex: 1000 // Ajusta z-index para estar por encima del contenido
+            zIndex: 1000 
           }
         }}
       >
