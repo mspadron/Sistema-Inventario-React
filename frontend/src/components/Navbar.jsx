@@ -1,23 +1,7 @@
-import {
-  Box,
-  CssBaseline,
-  Drawer,
-  List,
-  ListItem,
-  ListItemIcon,
-  ListItemText,
-  Divider // Importa Divider para separar visualmente los elementos
-} from '@mui/material';
-import {
-  Person as UserIcon,
-  Store as StoreIcon,
-  Inventory as InventoryIcon,
-  Payment as PaymentIcon,
-  Close as CloseIcon,
-  Home as HomeIcon
-} from '@mui/icons-material';
+import React, { useState } from 'react';
+import { Box, CssBaseline, Drawer, List, ListItem, ListItemIcon, ListItemText, Divider } from '@mui/material';
+import { Person as UserIcon, Store as StoreIcon, Inventory as InventoryIcon, Payment as PaymentIcon, Close as CloseIcon, Home as HomeIcon } from '@mui/icons-material';
 import { Link, useNavigate } from 'react-router-dom';
-import { useState } from 'react';
 
 const drawerWidth = 240;
 
@@ -44,22 +28,36 @@ const Navbar = () => {
   const renderMenuItems = () => {
     const menuItems = [];
 
-    if (tipoUsuario === '1') {
+    if (tipoUsuario === '1') { // Administrador
       menuItems.push(
-        { text: 'Dashboard', icon: <HomeIcon />, link: '/incompleto' },
+        { text: 'Dashboard', icon: <HomeIcon />, link: '/dashboard' },
         { text: 'Usuarios', icon: <UserIcon />, link: '/dashUser' },
         { text: 'Proveedores', icon: <StoreIcon />, link: '/dashProveedor' },
-        { text: 'Categorias', icon: <InventoryIcon />, link: '/dashCategoria' },
+        { text: 'Categorías', icon: <InventoryIcon />, link: '/dashCategoria' },
         { text: 'Productos', icon: <InventoryIcon />, link: '/dashProducto' },
-        { text: 'Existencias', icon: <PaymentIcon />, link: '/dashExistencia' }
-        
+        { text: 'Existencias', icon: <PaymentIcon />, link: '/dashExistencia' },
+        { text: 'Entradas', icon: <PaymentIcon />, link: '/dashEntrada' },
+        { text: 'Salidas', icon: <PaymentIcon />, link: '/dashSalida' },
+        { text: 'Existencias Mínimas', icon: <PaymentIcon />, link: '/reporteMinExis' }
       );
-    } else if (tipoUsuario === '2') {
+    } else if (tipoUsuario === '2') { // Bodega
       menuItems.push(
-        { text: 'Dashboard', icon: <HomeIcon />, link: '/incompleto' },
-        { text: 'Proveedores', icon: <StoreIcon />, link: '/incompleto' },
-        { text: 'Productos', icon: <InventoryIcon />, link: '/incompleto' },
-        { text: 'Existencias', icon: <PaymentIcon />, link: '/incompleto' }
+        { text: 'Dashboard', icon: <HomeIcon />, link: '/dashboard' },
+        { text: 'Existencias', icon: <PaymentIcon />, link: '/dashExistencia' }
+      );
+    } else if (tipoUsuario === '3') { // Gerente
+      menuItems.push(
+        { text: 'Dashboard', icon: <HomeIcon />, link: '/dashboard' },
+        { text: 'Entradas', icon: <PaymentIcon />, link: '/dashEntrada' },
+        { text: 'Salidas', icon: <PaymentIcon />, link: '/dashSalida' },
+        { text: 'Existencias Mínimas', icon: <PaymentIcon />, link: '/reporteMinExis' }
+      );
+    } else if (tipoUsuario === '4') { // Gestor
+      menuItems.push(
+        { text: 'Dashboard', icon: <HomeIcon />, link: '/dashboard' },
+        { text: 'Proveedores', icon: <StoreIcon />, link: '/dashProveedor' },
+        { text: 'Categorías', icon: <InventoryIcon />, link: '/dashCategoria' },
+        { text: 'Productos', icon: <InventoryIcon />, link: '/dashProducto' }
       );
     }
 
@@ -91,15 +89,13 @@ const Navbar = () => {
             <ListItemText primary={item.text} />
           </ListItem>
         ))}
-        <Divider />{' '}
-        {/* Añade una línea divisoria después de los elementos del menú */}
+        <Divider /> {/* Añade una línea divisoria después de los elementos del menú */}
         <ListItem
           button
           onClick={handleLogout}
           sx={{
-            backgroundColor:
-              hoveredItem === menuItems.length ? '#2c3848' : 'transparent', 
-            marginTop: 'auto', 
+            backgroundColor: hoveredItem === menuItems.length ? '#2c3848' : 'transparent',
+            marginTop: 'auto',
             '&:hover': {
               backgroundColor: '#2c3848',
               '& .MuiListItemIcon-root': {
@@ -137,9 +133,9 @@ const Navbar = () => {
             boxSizing: 'border-box',
             backgroundColor: '#1A202C',
             color: '#FFF',
-            height: '100vh', 
+            height: '100vh',
             top: 0,
-            zIndex: 1000 
+            zIndex: 1000
           }
         }}
       >

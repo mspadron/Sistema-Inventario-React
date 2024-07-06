@@ -1,8 +1,5 @@
 import {
   Button,
-  Card,
-  CardContent,
-  Typography,
   Table,
   TableBody,
   TableCell,
@@ -22,6 +19,7 @@ import UsuarioForm from './UsuarioForm.jsx';
 
 function UsuarioList() {
   const [usuarios, setUsuarios] = useState([]);
+  const [roles, setRoles] = useState([]);
   const [open, setOpen] = useState(false);
   const [editUserId, setEditUserId] = useState(null);
 
@@ -29,14 +27,34 @@ function UsuarioList() {
     try {
       const response = await fetch('http://localhost:4000/users');
       const data = await response.json();
-      if (Array.isArray(data.users)) {
-        setUsuarios(data.users);
+      if (Array.isArray(data.usuarios)) {
+        setUsuarios(data.usuarios);
+        
       } else {
         console.error('Los datos de usuarios no son un array:', data);
       }
     } catch (error) {
       console.error('Error al cargar usuarios:', error);
     }
+  };
+
+  const cargarRoles = async () => {
+    try {
+      const response = await fetch('http://localhost:4000/roles');
+      const data = await response.json();
+      if (Array.isArray(data.roles)) {
+        setRoles(data.roles);
+      } else {
+        console.error('Los datos de roles no son un array:', data);
+      }
+    } catch (error) {
+      console.error('Error al cargar roles:', error);
+    }
+  };
+
+  const getRolNombre = (idRol) => {
+    const rol = roles.find((rol) => rol.id_rol === idRol);
+    return rol ? rol.nombre_rol : 'Desconocido';
   };
 
   const handleDelete = async (id) => {
@@ -62,12 +80,13 @@ function UsuarioList() {
 
   useEffect(() => {
     cargarUsuarios();
+    cargarRoles();
   }, []);
 
   return (
     <Box sx={{ display: 'flex' }}>
       <Navbar />
-      <Box component="main" sx={{ flexGrow: 1, p: 3, marginLeft: '240px' }}>
+      <Box component="main" sx={{ flexGrow: 1, p: 3, marginLeft: '40px' }}>
         <h1>Lista de Usuarios</h1>
         <Button
           variant="contained"
@@ -90,7 +109,7 @@ function UsuarioList() {
               {usuarios.map((usuario) => (
                 <TableRow key={usuario.id_usuario}>
                   <TableCell>{usuario.nombre_usuario}</TableCell>
-                  <TableCell>{usuario.id_rol}</TableCell>
+                  <TableCell>{getRolNombre(usuario.id_rol)}</TableCell>
                   <TableCell>
                     <Button
                       variant="contained"
@@ -113,7 +132,7 @@ function UsuarioList() {
             </TableBody>
           </Table>
         </TableContainer>
-
+        
         <Dialog open={open} onClose={handleClose} maxWidth="sm" fullWidth>
           <DialogTitle>{editUserId ? 'Editar Usuario' : 'Crear Usuario'}</DialogTitle>
           <DialogContent>

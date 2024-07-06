@@ -16,16 +16,38 @@ export const createProducto = async (req, res, next) => {
   }
 };
 
+
+
+export const countProductos = async () => {
+  const result = await pool.query(`SELECT COUNT(*) FROM "producto"`);
+  return parseInt(result.rows[0].count, 10);
+};
+
 export const getAllProductos = async (req, res, next) => {
   try {
-    const allProductos = await pool.query('SELECT * FROM producto');
-    res.json(allProductos.rows);
+    const allProductos = await pool.query(`SELECT * FROM "producto"`);
+    const productoCount = await countProductos();
+    res.json({ productos: allProductos.rows, count: productoCount });
   } catch (error) {
     next(error);
   }
 };
 
-export const getProducto = async (req, res) => {
+export const getProductosByCategoria = async (req, res, next) => {
+  try {
+    const { categoriaId } = req.params;
+    const result = await pool.query('SELECT * FROM producto WHERE id_categoria = $1', [categoriaId]);
+
+    if (result.rows.length === 0)
+      return res.status(404).json({ message: 'No products found for the given category' });
+
+    res.json(result.rows);
+  } catch (error) {
+    next(error);
+  }
+};
+
+export const getProducto = async (req, res, next) => {
   try {
     const { id } = req.params;
     const result = await pool.query('SELECT * FROM producto WHERE id_producto = $1', [id]);
@@ -39,7 +61,7 @@ export const getProducto = async (req, res) => {
   }
 };
 
-export const updateProducto = async (req, res) => {
+export const updateProducto = async (req, res, next) => {
   try {
     const { id } = req.params;
     const { id_categoria, nombre_producto, precio_producto, fecha_expiracion_producto } = req.body;
@@ -59,26 +81,7 @@ export const updateProducto = async (req, res) => {
   }
 };
 
-export const updateProductoExistencia = async (req, res) => {
-  try {
-    const { id } = req.params;
-    const { id_existencia } = req.body;
-
-    const result = await pool.query(
-      `UPDATE producto SET id_existencia = $1 WHERE id_producto = $2 RETURNING *`,
-      [id_existencia, id]
-    );
-
-    if (result.rows.length === 0)
-      return res.status(404).json({ message: 'Producto not found' });
-
-    return res.json(result.rows[0]);
-  } catch (error) {
-    next(error);
-  }
-};
-
-export const deleteProducto = async (req, res) => {
+export const deleteProducto = async (req, res, next) => {
   try {
     const { id } = req.params;
     const result = await pool.query('DELETE FROM producto WHERE id_producto = $1', [id]);
@@ -90,3 +93,6 @@ export const deleteProducto = async (req, res) => {
     next(error);
   }
 };
+
+
+

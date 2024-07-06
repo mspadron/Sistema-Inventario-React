@@ -16,11 +16,19 @@ export const createEntrada = async (req, res, next) => {
       [cantidad_entrada, id_existencia]
     );
 
-    // Crear relación en la tabla gestiona
-    await pool.query(
-      'INSERT INTO gestiona (id_usuario, id_existencia) VALUES ($1, $2)',
+    // Verificar si la relación ya existe en la tabla gestiona
+    const result = await pool.query(
+      'SELECT * FROM gestiona WHERE id_usuario = $1 AND id_existencia = $2',
       [id_usuario, id_existencia]
     );
+
+    // Si la relación no existe, crearla
+    if (result.rowCount === 0) {
+      await pool.query(
+        'INSERT INTO gestiona (id_usuario, id_existencia) VALUES ($1, $2)',
+        [id_usuario, id_existencia]
+      );
+    }
 
     res.json(newEntrada.rows[0]);
   } catch (error) {
@@ -30,12 +38,43 @@ export const createEntrada = async (req, res, next) => {
 
 export const getAllEntradas = async (req, res, next) => {
   try {
-    const allEntradas = await pool.query('SELECT * FROM entrada');
-    res.json(allEntradas.rows);
+    const query = `
+      SELECT 
+          e.id_entrada, 
+          e.cantidad_entrada, 
+          e.fecha_entrada, 
+          c.nombre_categoria, 
+          pr.nombre_proveedor, 
+          p.nombre_producto, 
+          u.nombre_usuario AS gestionada_por
+      FROM 
+          entrada e
+      JOIN 
+          existencia ex ON e.id_existencia = ex.id_existencia
+      JOIN 
+          producto p ON ex.id_producto = p.id_producto
+      JOIN 
+          categoria c ON p.id_categoria = c.id_categoria
+      LEFT JOIN 
+          proveedor pr ON ex.id_proveedor = pr.id_proveedor
+      LEFT JOIN 
+          gestiona g ON ex.id_existencia = g.id_existencia
+      LEFT JOIN 
+          usuario u ON g.id_usuario = u.id_usuario;
+    `;
+    const allEntradas = await pool.query(query);
+    const entradaCount = await countEntradas();
+    res.json({ entradas: allEntradas.rows, count: entradaCount });
   } catch (error) {
     next(error);
   }
 };
+
+export const countEntradas = async () => {
+  const result = await pool.query(`SELECT COUNT(*) FROM "entrada"`);
+  return parseInt(result.rows[0].count, 10);
+};
+
 
 export const getEntrada = async (req, res, next) => {
   try {
@@ -104,3 +143,6 @@ export const deleteEntrada = async (req, res, next) => {
     next(error);
   }
 };
+
+
+

@@ -11,5 +11,4 @@ const router = Router();
 
 router.route('/').get(getAllSalidas).post(createSalida);
 router.route('/:id').get(getSalida).put(updateSalida).delete(deleteSalida);
-
 export default router;

@@ -31,7 +31,7 @@ function UsuarioForm({ userId, onClose, onSave }) {
       try {
         const response = await fetch('http://localhost:4000/roles');
         const data = await response.json();
-        setRoles(data);
+        setRoles(data.roles);
       } catch (error) {
         console.error('Error al cargar roles:', error);
       }

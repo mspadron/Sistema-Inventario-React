@@ -64,7 +64,7 @@ export const Login = () => {
           data.tipoUsuario
         ); // Nuevo: imprimir el tipo de usuario en la consola
         // navigate('/principal');
-        navigate('/incompleto');
+        navigate('/dashboard');
       } else {
         alert(data.message);
       }

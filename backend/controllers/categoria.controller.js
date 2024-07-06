@@ -15,16 +15,22 @@ export const createCategoria = async (req, res, next) => {
   }
 };
 
+export const countCategorias = async () => {
+  const result = await pool.query(`SELECT COUNT(*) FROM "categoria"`);
+  return parseInt(result.rows[0].count, 10);
+};
+
 export const getAllCategorias = async (req, res, next) => {
   try {
-    const allCategorias = await pool.query('SELECT * FROM categoria');
-    res.json(allCategorias.rows);
+    const allCategorias = await pool.query(`SELECT * FROM "categoria"`);
+    const categoriaCount = await countCategorias();
+    res.json({ categorias: allCategorias.rows, count: categoriaCount });
   } catch (error) {
     next(error);
   }
 };
 
-export const getCategoria = async (req, res) => {
+export const getCategoria = async (req, res,next) => {
   try {
     const { id } = req.params;
     const result = await pool.query('SELECT * FROM categoria WHERE id_categoria = $1', [
@@ -71,3 +77,5 @@ export const deleteCategoria = async (req, res) => {
     next(error);
   }
 };
+
+

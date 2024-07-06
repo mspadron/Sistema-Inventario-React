@@ -18,13 +18,19 @@ export const createRol = async (req, res, next) => {
 export const getAllRoles = async (req, res, next) => {
   try {
     const allRoles = await pool.query('SELECT * FROM rol');
-    res.json(allRoles.rows);
+    const rolCount = await countRoles();
+    res.json({ roles: allRoles.rows, count: rolCount });
   } catch (error) {
     next(error);
   }
 };
 
-export const getRol = async (req, res) => {
+export const countRoles = async () => {
+  const result = await pool.query(`SELECT COUNT(*) FROM "rol"`);
+  return parseInt(result.rows[0].count, 10);
+};
+
+export const getRol = async (req, res,next) => {
   try {
     const { id } = req.params;
     const result = await pool.query('SELECT * FROM rol WHERE id_rol = $1', [
@@ -71,3 +77,5 @@ export const deleteRol = async (req, res) => {
     next(error);
   }
 };
+
+

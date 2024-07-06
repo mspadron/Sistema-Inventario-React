@@ -20,15 +20,7 @@ export const createUser = async (req, res, next) => {
   }
 };
 
-export const getAllUsers = async (req, res, next) => {
-  try {
-    const allUsers = await pool.query(`SELECT * FROM usuario`);
-    const userCount = await countUsers(); // Obtener el conteo de usuarios
-    res.json({ users: allUsers.rows, count: userCount });
-  } catch (error) {
-    next(error);
-  }
-};
+
 
 export const countUsers = async () => {
   const result = await pool.query(`SELECT COUNT(*) FROM usuario`);
@@ -128,3 +120,21 @@ export const login = async (req, res) => {
     res.status(500).json({ message: error.message });
   }
 };
+
+
+export const countUsuarios = async () => {
+  const result = await pool.query(`SELECT COUNT(*) FROM "usuario"`);
+  return parseInt(result.rows[0].count, 10);
+};
+
+export const getAllUsers = async (req, res, next) => {
+  try {
+    const allUsers = await pool.query(`SELECT * FROM "usuario"`);
+    const userCount = await countUsuarios();
+    res.json({ usuarios: allUsers.rows, count: userCount });
+  } catch (error) {
+    next(error);
+  }
+};
+
+

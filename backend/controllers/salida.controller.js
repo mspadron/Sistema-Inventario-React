@@ -16,11 +16,19 @@ export const createSalida = async (req, res, next) => {
       [cantidad_salida, id_existencia]
     );
 
-    // Crear relación en la tabla gestiona
-    await pool.query(
-      'INSERT INTO gestiona (id_usuario, id_existencia) VALUES ($1, $2)',
+    // Verificar si la relación ya existe en la tabla gestiona
+    const result = await pool.query(
+      'SELECT * FROM gestiona WHERE id_usuario = $1 AND id_existencia = $2',
       [id_usuario, id_existencia]
     );
+
+    // Si la relación no existe, crearla
+    if (result.rowCount === 0) {
+      await pool.query(
+        'INSERT INTO gestiona (id_usuario, id_existencia) VALUES ($1, $2)',
+        [id_usuario, id_existencia]
+      );
+    }
 
     res.json(newSalida.rows[0]);
   } catch (error) {
@@ -30,12 +38,44 @@ export const createSalida = async (req, res, next) => {
 
 export const getAllSalidas = async (req, res, next) => {
   try {
-    const allSalidas = await pool.query('SELECT * FROM salida');
-    res.json(allSalidas.rows);
+    const query = `
+      SELECT 
+          s.id_salida, 
+          s.cantidad_salida, 
+          s.fecha_salida, 
+          c.nombre_categoria, 
+          pr.nombre_proveedor, 
+          p.nombre_producto, 
+          u.nombre_usuario AS gestionada_por
+      FROM 
+          salida s
+      JOIN 
+          existencia e ON s.id_existencia = e.id_existencia
+      JOIN 
+          producto p ON e.id_producto = p.id_producto
+      JOIN 
+          categoria c ON p.id_categoria = c.id_categoria
+      LEFT JOIN 
+          proveedor pr ON e.id_proveedor = pr.id_proveedor
+      LEFT JOIN 
+          gestiona g ON e.id_existencia = g.id_existencia
+      LEFT JOIN 
+          usuario u ON g.id_usuario = u.id_usuario;
+    `;
+    const allSalidas = await pool.query(query);
+    const salidaCount = await countSalidas();
+    res.json({ salidas: allSalidas.rows, count: salidaCount });
+
   } catch (error) {
     next(error);
   }
 };
+
+export const countSalidas = async () => {
+  const result = await pool.query(`SELECT COUNT(*) FROM "salida"`);
+  return parseInt(result.rows[0].count, 10);
+};
+
 
 export const getSalida = async (req, res, next) => {
   try {
@@ -104,3 +144,5 @@ export const deleteSalida = async (req, res, next) => {
     next(error);
   }
 };
+
+

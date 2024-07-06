@@ -30,8 +30,8 @@ import {
       try {
         const response = await fetch('http://localhost:4000/productos');
         const data = await response.json();
-        if (Array.isArray(data)) {
-          setProductos(data);
+        if (Array.isArray(data.productos)) {
+          setProductos(data.productos);
         } else {
           console.error('Los datos de productos no son un array:', data);
         }
@@ -44,8 +44,8 @@ import {
       try {
         const response = await fetch('http://localhost:4000/categorias');
         const data = await response.json();
-        if (Array.isArray(data)) {
-          setCategorias(data);
+        if (Array.isArray(data.categorias)) {
+          setCategorias(data.categorias);
         } else {
           console.error('Los datos de categorías no son un array:', data);
         }
@@ -88,7 +88,7 @@ import {
     return (
       <Box sx={{ display: 'flex' }}>
         <Navbar />
-        <Box component="main" sx={{ flexGrow: 1, p: 3, marginLeft: '240px' }}>
+        <Box component="main" sx={{ flexGrow: 1, p: 3, marginLeft: '40px' }}>
           <h1>Lista de Productos</h1>
           <Button
             variant="contained"

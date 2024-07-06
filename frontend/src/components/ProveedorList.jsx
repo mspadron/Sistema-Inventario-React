@@ -26,7 +26,13 @@ import {
       try {
         const response = await fetch('http://localhost:4000/proveedores');
         const data = await response.json();
-        setProveedores(data);
+        if (Array.isArray(data.proveedores)) {
+          setProveedores(data.proveedores);
+          
+        } else {
+          console.error('Los datos del proveedor no son un array:', data);
+        }
+       
       } catch (error) {
         console.error('Error al cargar proveedores:', error);
       }
@@ -60,7 +66,7 @@ import {
     return (
       <Box sx={{ display: 'flex' }}>
         <Navbar />
-        <Box component="main" sx={{ flexGrow: 1, p: 3, marginLeft: '240px' }}>
+        <Box component="main" sx={{ flexGrow: 1, p: 3, marginLeft: '40px' }}>
           <h1>Lista de Proveedores</h1>
           <Button variant="contained" color="primary" onClick={() => handleOpen()}>
             Nuevo Proveedor
