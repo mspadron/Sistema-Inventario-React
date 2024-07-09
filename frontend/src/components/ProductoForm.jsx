@@ -3,29 +3,25 @@ import {
   Card,
   CardContent,
   CircularProgress,
+  FormControl,
   Grid,
+  InputLabel,
   MenuItem,
   Select,
-  TextField,
-  Typography,
+  TextField
 } from '@mui/material';
 import { useState, useEffect } from 'react';
-import { useNavigate, useParams } from 'react-router-dom';
-import Navbar from './Navbar.jsx';
 
 function ProductoForm({ productoId, onClose, onSave }) {
   const [producto, setProducto] = useState({
     id_categoria: '',
     nombre_producto: '',
     precio_producto: '',
-    fecha_expiracion_producto: '',
+    fecha_expiracion_producto: ''
   });
   const [categorias, setCategorias] = useState([]);
   const [loading, setLoading] = useState(false);
   const [loadingProducto, setLoadingProducto] = useState(false);
-
-  const navigate = useNavigate();
-  const params = useParams();
 
   useEffect(() => {
     const fetchCategorias = async () => {
@@ -46,7 +42,9 @@ function ProductoForm({ productoId, onClose, onSave }) {
       if (productoId) {
         setLoadingProducto(true);
         try {
-          const response = await fetch(`http://localhost:4000/productos/${productoId}`);
+          const response = await fetch(
+            `http://localhost:4000/productos/${productoId}`
+          );
           const data = await response.json();
           if (data && typeof data === 'object' && !Array.isArray(data)) {
             setProducto(data); // Establece el producto a editar
@@ -77,7 +75,7 @@ function ProductoForm({ productoId, onClose, onSave }) {
       const response = await fetch(url, {
         method: method,
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(producto),
+        body: JSON.stringify(producto)
       });
       await response.json();
       setLoading(false);
@@ -94,85 +92,97 @@ function ProductoForm({ productoId, onClose, onSave }) {
   };
 
   return (
-    <>
-      <Navbar />
-      <div>
-        <Typography variant="h5" textAlign="center" color="white">
-          {productoId ? 'Editar Producto' : 'Crear Producto'}
-        </Typography>
-        <Card style={{ backgroundColor: '#1e272e', padding: '1rem' }}>
-          <CardContent>
-            {loadingProducto ? (
-              <CircularProgress color="inherit" />
-            ) : (
-              <form onSubmit={handleSubmit}>
-                <Grid container spacing={2}>
-                  <Grid item xs={6}>
-                    <Select
-                      variant="filled"
-                      label="Categoría"
-                      fullWidth
-                      sx={{ marginBottom: '1rem' }}
-                      name="id_categoria"
-                      value={producto.id_categoria || ''}
-                      onChange={handleChange}
-                      inputProps={{ style: { color: 'white' } }}
-                    >
-                      {categorias.map((categoria) => (
-                        <MenuItem key={categoria.id_categoria} value={categoria.id_categoria}>
-                          {categoria.nombre_categoria}
-                        </MenuItem>
-                      ))}
-                    </Select>
-                  </Grid>
-                  <Grid item xs={6}>
-                    <TextField
-                      variant="filled"
-                      label="Nombre Producto"
-                      fullWidth
-                      sx={{ marginBottom: '1rem' }}
-                      name="nombre_producto"
-                      value={producto.nombre_producto || ''}
-                      onChange={handleChange}
-                      inputProps={{ style: { color: 'white' } }}
-                    />
-                  </Grid>
-                </Grid>
+    <Card
+      sx={{
+        boxShadow: 'none',
+        border: 'none',
+        padding: '1rem' // Añadido para mejorar el espacio en el formulario
+      }}
+    >
+      <CardContent>
+        {loadingProducto ? (
+          <CircularProgress color="inherit" />
+        ) : (
+          <form onSubmit={handleSubmit}>
+            <Grid container spacing={2}>
+              <Grid item xs={12} md={6}>
+                <FormControl variant="filled" fullWidth>
+                  <InputLabel htmlFor="categoria-label" sx={{ color: 'black' }}>
+                    Categoría
+                  </InputLabel>
+                  <Select
+                    labelId="categoria-label"
+                    variant="filled"
+                    fullWidth
+                    sx={{ marginBottom: '1rem' }}
+                    name="id_categoria"
+                    value={producto.id_categoria || ''}
+                    onChange={handleChange}
+                    inputProps={{ style: { color: 'black' } }}
+                  >
+                    {categorias.map((categoria) => (
+                      <MenuItem
+                        key={categoria.id_categoria}
+                        value={categoria.id_categoria}
+                      >
+                        {categoria.nombre_categoria}
+                      </MenuItem>
+                    ))}
+                  </Select>
+                </FormControl>
+              </Grid>
+              <Grid item xs={12} md={6}>
                 <TextField
                   variant="filled"
-                  label="Precio"
+                  label="Nombre Producto"
                   fullWidth
                   sx={{ marginBottom: '1rem' }}
-                  name="precio_producto"
-                  value={producto.precio_producto || ''}
+                  name="nombre_producto"
+                  value={producto.nombre_producto || ''}
                   onChange={handleChange}
-                  inputProps={{ style: { color: 'white' } }}
+                  inputProps={{ style: { color: 'black' } }} // Texto en negro
                 />
-                <TextField
-                  variant="filled"
-                  label="Fecha de Expiración"
-                  fullWidth
-                  sx={{ marginBottom: '1rem' }}
-                  name="fecha_expiracion_producto"
-                  type="date"
-                  value={producto.fecha_expiracion_producto || ''}
-                  onChange={handleChange}
-                  InputLabelProps={{ shrink: true }}
-                  inputProps={{ style: { color: 'white' } }}
-                />
-                <Button variant="contained" color="primary" type="submit">
-                  {loading ? (
-                    <CircularProgress color="inherit" size={24} />
-                  ) : (
-                    'Guardar'
-                  )}
-                </Button>
-              </form>
-            )}
-          </CardContent>
-        </Card>
-      </div>
-    </>
+              </Grid>
+            </Grid>
+            <TextField
+              variant="filled"
+              label="Precio"
+              fullWidth
+              sx={{ marginBottom: '1rem' }}
+              name="precio_producto"
+              value={producto.precio_producto || ''}
+              onChange={handleChange}
+              inputProps={{ style: { color: 'black' } }} // Texto en negro
+            />
+            <TextField
+              variant="filled"
+              label="Fecha de Expiración"
+              fullWidth
+              sx={{ marginBottom: '1rem' }}
+              name="fecha_expiracion_producto"
+              type="date"
+              value={producto.fecha_expiracion_producto || ''}
+              onChange={handleChange}
+              InputLabelProps={{ shrink: true }}
+              inputProps={{ style: { color: 'black' } }} // Texto en negro
+            />
+            <Button
+              variant="contained"
+              color="primary"
+              type="submit"
+              fullWidth // El botón ocupa todo el ancho del formulario
+              sx={{ marginTop: '1rem' }}
+            >
+              {loading ? (
+                <CircularProgress color="inherit" size={24} />
+              ) : (
+                'Guardar'
+              )}
+            </Button>
+          </form>
+        )}
+      </CardContent>
+    </Card>
   );
 }
 

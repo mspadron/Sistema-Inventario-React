@@ -3,28 +3,24 @@ import {
   Card,
   CardContent,
   CircularProgress,
+  FormControl,
   Grid,
+  InputLabel,
   MenuItem,
   Select,
-  TextField,
-  Typography,
+  TextField
 } from '@mui/material';
 import { useState, useEffect } from 'react';
-import { useNavigate, useParams } from 'react-router-dom';
-import Navbar from './Navbar.jsx';
 
 function UsuarioForm({ userId, onClose, onSave }) {
   const [usuario, setUsuario] = useState({
     id_rol: '',
     nombre_usuario: '',
-    clave_usuario: '',
+    clave_usuario: ''
   });
   const [roles, setRoles] = useState([]);
   const [loading, setLoading] = useState(false);
   const [loadingUser, setLoadingUser] = useState(false);
-
-  const navigate = useNavigate();
-  const params = useParams();
 
   useEffect(() => {
     const fetchRoles = async () => {
@@ -68,7 +64,7 @@ function UsuarioForm({ userId, onClose, onSave }) {
       const response = await fetch(url, {
         method: method,
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(usuario),
+        body: JSON.stringify(usuario)
       });
       await response.json();
       setLoading(false);
@@ -85,50 +81,51 @@ function UsuarioForm({ userId, onClose, onSave }) {
   };
 
   return (
-    <>
-      <Navbar />
-      <div>
-        <Typography variant="h5" textAlign="center" color="white">
-          {userId ? 'Editar Usuario' : 'Crear Usuario'}
-        </Typography>
-        <Card style={{ backgroundColor: '#1e272e', padding: '1rem' }}>
-          <CardContent>
-            {loadingUser ? (
-              <CircularProgress color="inherit" />
-            ) : (
-              <form onSubmit={handleSubmit}>
-                <Grid container spacing={2}>
-                  <Grid item xs={6}>
-                    <Select
-                      variant="filled"
-                      label="Rol"
-                      fullWidth
-                      sx={{ marginBottom: '1rem' }}
-                      name="id_rol"
-                      value={usuario.id_rol || ''}
-                      onChange={handleChange}
-                      inputProps={{ style: { color: 'white' } }}
-                    >
-                      {roles.map((rol) => (
-                        <MenuItem key={rol.id_rol} value={rol.id_rol}>
-                          {rol.nombre_rol}
-                        </MenuItem>
-                      ))}
-                    </Select>
-                  </Grid>
-                  <Grid item xs={6}>
-                    <TextField
-                      variant="filled"
-                      label="Nombre Usuario"
-                      fullWidth
-                      sx={{ marginBottom: '1rem' }}
-                      name="nombre_usuario"
-                      value={usuario.nombre_usuario || ''}
-                      onChange={handleChange}
-                      inputProps={{ style: { color: 'white' } }}
-                    />
-                  </Grid>
-                </Grid>
+    <Card
+      sx={{
+        boxShadow: 'none',
+        border: 'none'
+      }}
+    >
+      <CardContent>
+        {loadingUser ? (
+          <CircularProgress color="inherit" />
+        ) : (
+          <form onSubmit={handleSubmit}>
+            <Grid container spacing={2}>
+              <Grid item xs={12} md={6}>
+                <FormControl variant="filled" fullWidth>
+                  <InputLabel htmlFor="rol-label">Rol</InputLabel>
+                  <Select
+                    variant="filled"
+                    fullWidth
+                    id="rol-label"
+                    name="id_rol"
+                    value={usuario.id_rol || ''}
+                    onChange={handleChange}
+                    inputProps={{ style: { color: 'black' } }}
+                  >
+                    {roles.map((rol) => (
+                      <MenuItem key={rol.id_rol} value={rol.id_rol}>
+                        {rol.nombre_rol}
+                      </MenuItem>
+                    ))}
+                  </Select>
+                </FormControl>
+              </Grid>
+              <Grid item xs={12} md={6}>
+                <TextField
+                  variant="filled"
+                  label="Nombre Usuario"
+                  fullWidth
+                  sx={{ marginBottom: '1rem' }}
+                  name="nombre_usuario"
+                  value={usuario.nombre_usuario || ''}
+                  onChange={handleChange}
+                  inputProps={{ style: { color: 'black' } }}
+                />
+              </Grid>
+              <Grid item xs={12}>
                 <TextField
                   variant="filled"
                   label="Clave"
@@ -138,21 +135,27 @@ function UsuarioForm({ userId, onClose, onSave }) {
                   type="password"
                   value={usuario.clave_usuario || ''}
                   onChange={handleChange}
-                  inputProps={{ style: { color: 'white' } }}
+                  inputProps={{ style: { color: 'black' } }}
                 />
-                <Button variant="contained" color="primary" type="submit">
-                  {loading ? (
-                    <CircularProgress color="inherit" size={24} />
-                  ) : (
-                    'Guardar'
-                  )}
-                </Button>
-              </form>
-            )}
-          </CardContent>
-        </Card>
-      </div>
-    </>
+              </Grid>
+            </Grid>
+            <Button
+              variant="contained"
+              color="primary"
+              fullWidth
+              type="submit"
+              style={{ marginTop: '1rem' }}
+            >
+              {loading ? (
+                <CircularProgress color="inherit" size={24} />
+              ) : (
+                'Guardar'
+              )}
+            </Button>
+          </form>
+        )}
+      </CardContent>
+    </Card>
   );
 }
 

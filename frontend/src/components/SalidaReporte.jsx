@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { CSVLink } from 'react-csv';
 import jsPDF from 'jspdf';
 import 'jspdf-autotable';
@@ -7,13 +7,36 @@ import {
   Table,
   TableBody,
   TableCell,
+  tableCellClasses,
   TableContainer,
   TableHead,
   TableRow,
   Paper,
-  Box,
+  Box
 } from '@mui/material';
 import Navbar from './Navbar.jsx';
+
+import { styled } from '@mui/material/styles';
+
+const StyledTableCell = styled(TableCell)(({ theme }) => ({
+  [`&.${tableCellClasses.head}`]: {
+    backgroundColor: '#02152B',
+    color: theme.palette.common.white
+  },
+  [`&.${tableCellClasses.body}`]: {
+    fontSize: 14
+  }
+}));
+
+const StyledTableRow = styled(TableRow)(({ theme }) => ({
+  '&:nth-of-type(odd)': {
+    backgroundColor: theme.palette.action.hover
+  },
+  // hide last border
+  '&:last-child td, &:last-child th': {
+    border: 0
+  }
+}));
 
 const SalidaReporte = () => {
   const [salidas, setSalidas] = useState([]);
@@ -34,10 +57,18 @@ const SalidaReporte = () => {
 
   const downloadPDF = () => {
     const doc = new jsPDF();
-    const tableColumn = ["ID Salida", "Cantidad Salida", "Fecha Salida", "Categoria", "Proveedor", "Producto", "Gestionada por"];
+    const tableColumn = [
+      'ID Salida',
+      'Cantidad Salida',
+      'Fecha Salida',
+      'Categoria',
+      'Proveedor',
+      'Producto',
+      'Gestionada por'
+    ];
     const tableRows = [];
 
-    salidas.forEach(salida => {
+    salidas.forEach((salida) => {
       const salidaData = [
         salida.id_salida,
         salida.cantidad_salida,
@@ -51,51 +82,73 @@ const SalidaReporte = () => {
     });
 
     doc.autoTable(tableColumn, tableRows, { startY: 20 });
-    doc.text("Reporte de Salidas", 14, 15);
+    doc.text('Reporte de Salidas', 14, 15);
     doc.save('salidas_reporte.pdf');
   };
 
   return (
     <Box sx={{ display: 'flex' }}>
       <Navbar />
-      <Box component="main" sx={{ flexGrow: 1, p: 3, marginLeft: '20px' }}>
-        <h1>Reporte de Salidas</h1>
-        <Button variant="contained" color="primary" onClick={downloadPDF} sx={{ marginRight: '1rem' }}>
+      <Box
+        component="main"
+        sx={{ flexGrow: 1, paddingRight: 4, marginLeft: '40px' }}
+      >
+        <h1>REPORTE DE SALIDAS</h1>
+        <Button
+          variant="contained"
+          color="primary"
+          onClick={downloadPDF}
+          sx={{ marginRight: '1rem' }}
+        >
           Descargar PDF
         </Button>
         <Button variant="contained" color="secondary">
           <CSVLink
             data={salidas}
-            filename={"salidas_reporte.csv"}
+            filename={'salidas_reporte.csv'}
             style={{ color: 'white', textDecoration: 'none' }}
           >
             Descargar CSV
           </CSVLink>
         </Button>
         <TableContainer component={Paper} sx={{ marginTop: '1rem' }}>
-          <Table>
+          <Table sx={{ minWidth: 700 }} aria-label="customized table">
             <TableHead>
               <TableRow>
-                <TableCell>ID Salida</TableCell>
-                <TableCell>Cantidad Salida</TableCell>
-                <TableCell>Categoria</TableCell>
-                <TableCell>Proveedor</TableCell>
-                <TableCell>Producto</TableCell>
-                <TableCell>Gestionada por</TableCell>
-                <TableCell>Fecha Salida</TableCell>
+                <StyledTableCell>ID Salida</StyledTableCell>
+                <StyledTableCell align="right">Cantidad Salida</StyledTableCell>
+                <StyledTableCell align="right">Categoria</StyledTableCell>
+                <StyledTableCell align="right">Proveedor</StyledTableCell>
+                <StyledTableCell align="right">Producto</StyledTableCell>
+                <StyledTableCell align="right">Gestionada por</StyledTableCell>
+                <StyledTableCell align="right">Fecha Salida</StyledTableCell>
               </TableRow>
             </TableHead>
             <TableBody>
               {salidas.map((salida) => (
-                <TableRow key={salida.id_salida}>
-                  <TableCell>{salida.id_salida}</TableCell>
-                  <TableCell>{salida.cantidad_salida}</TableCell>
-                  <TableCell>{salida.nombre_categoria}</TableCell>
-                  <TableCell>{salida.nombre_proveedor}</TableCell>
-                  <TableCell>{salida.nombre_producto}</TableCell>
-                  <TableCell>{salida.gestionada_por}</TableCell>
-                  <TableCell>{new Date(salida.fecha_salida).toLocaleDateString()}</TableCell>
-                </TableRow>
+                <StyledTableRow key={salida.id_salida}>
+                  <StyledTableCell component="th" scope="row">
+                    {salida.id_salida}
+                  </StyledTableCell>
+                  <StyledTableCell align="right">
+                    {salida.cantidad_salida}
+                  </StyledTableCell>
+                  <StyledTableCell align="right">
+                    {salida.nombre_categoria}
+                  </StyledTableCell>
+                  <StyledTableCell align="right">
+                    {salida.nombre_proveedor}
+                  </StyledTableCell>
+                  <StyledTableCell align="right">
+                    {salida.nombre_producto}
+                  </StyledTableCell>
+                  <StyledTableCell align="right">
+                    {salida.gestionada_por}
+                  </StyledTableCell>
+                  <StyledTableCell align="right">
+                    {new Date(salida.fecha_salida).toLocaleDateString()}
+                  </StyledTableCell>
+                </StyledTableRow>
               ))}
             </TableBody>
           </Table>

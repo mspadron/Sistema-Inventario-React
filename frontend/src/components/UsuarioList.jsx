@@ -3,6 +3,7 @@ import {
   Table,
   TableBody,
   TableCell,
+  tableCellClasses,
   TableContainer,
   TableHead,
   TableRow,
@@ -11,11 +12,33 @@ import {
   Dialog,
   DialogTitle,
   DialogContent,
-  DialogActions,
+  DialogActions
 } from '@mui/material';
 import { useEffect, useState } from 'react';
 import Navbar from './Navbar.jsx';
 import UsuarioForm from './UsuarioForm.jsx';
+
+import { styled } from '@mui/material/styles';
+
+const StyledTableCell = styled(TableCell)(({ theme }) => ({
+  [`&.${tableCellClasses.head}`]: {
+    backgroundColor: '#02152B',
+    color: theme.palette.common.white
+  },
+  [`&.${tableCellClasses.body}`]: {
+    fontSize: 14
+  }
+}));
+
+const StyledTableRow = styled(TableRow)(({ theme }) => ({
+  '&:nth-of-type(odd)': {
+    backgroundColor: theme.palette.action.hover
+  },
+  // hide last border
+  '&:last-child td, &:last-child th': {
+    border: 0
+  }
+}));
 
 function UsuarioList() {
   const [usuarios, setUsuarios] = useState([]);
@@ -29,7 +52,6 @@ function UsuarioList() {
       const data = await response.json();
       if (Array.isArray(data.usuarios)) {
         setUsuarios(data.usuarios);
-        
       } else {
         console.error('Los datos de usuarios no son un array:', data);
       }
@@ -60,7 +82,7 @@ function UsuarioList() {
   const handleDelete = async (id) => {
     try {
       await fetch(`http://localhost:4000/users/${id}`, {
-        method: 'DELETE',
+        method: 'DELETE'
       });
       setUsuarios(usuarios.filter((usuario) => usuario.id_usuario !== id));
     } catch (error) {
@@ -86,61 +108,80 @@ function UsuarioList() {
   return (
     <Box sx={{ display: 'flex' }}>
       <Navbar />
-      <Box component="main" sx={{ flexGrow: 1, p: 3, marginLeft: '40px' }}>
-        <h1>Lista de Usuarios</h1>
+      <Box
+        component="main"
+        sx={{ flexGrow: 1, paddingRight: 4, marginLeft: '40px' }}
+      >
+        <h1>LISTA DE USUARIOS</h1>
         <Button
           variant="contained"
-          color="primary"
+          color="secondary"
           onClick={() => handleOpen()}
         >
-          Nuevo Usuario
+          NUEVO USUARIO
         </Button>
 
         <TableContainer component={Paper} sx={{ marginTop: '1rem' }}>
-          <Table>
+          <Table sx={{ minWidth: 700 }} aria-label="customized table">
             <TableHead>
               <TableRow>
-                <TableCell>Nombre</TableCell>
-                <TableCell>Rol</TableCell>
-                <TableCell>Acciones</TableCell>
+                <StyledTableCell>Nombre</StyledTableCell>
+                <StyledTableCell align="right">Rol</StyledTableCell>
+                <StyledTableCell align="right">Acciones</StyledTableCell>
               </TableRow>
             </TableHead>
             <TableBody>
               {usuarios.map((usuario) => (
-                <TableRow key={usuario.id_usuario}>
-                  <TableCell>{usuario.nombre_usuario}</TableCell>
-                  <TableCell>{getRolNombre(usuario.id_rol)}</TableCell>
-                  <TableCell>
+                <StyledTableRow key={usuario.id_usuario}>
+                  <StyledTableCell component="th" scope="row">
+                    {usuario.nombre_usuario}
+                  </StyledTableCell>
+                  <StyledTableCell align="right">
+                    {getRolNombre(usuario.id_rol)}
+                  </StyledTableCell>
+                  <StyledTableCell align="right">
                     <Button
                       variant="contained"
-                      color="inherit"
+                      sx={{
+                        backgroundColor: '#FFA000',
+                        color: 'white', // Cambia el color del texto si es necesario
+                        '&:hover': {
+                          backgroundColor: '#FFA001' // Color al hacer hover
+                        }
+                      }}
                       onClick={() => handleOpen(usuario.id_usuario)}
                     >
                       Editar
                     </Button>
                     <Button
                       variant="contained"
-                      color="warning"
+                      color="error"
                       onClick={() => handleDelete(usuario.id_usuario)}
                       sx={{ marginLeft: '.5rem' }}
                     >
                       Eliminar
                     </Button>
-                  </TableCell>
-                </TableRow>
+                  </StyledTableCell>
+                </StyledTableRow>
               ))}
             </TableBody>
           </Table>
         </TableContainer>
-        
+
         <Dialog open={open} onClose={handleClose} maxWidth="sm" fullWidth>
-          <DialogTitle>{editUserId ? 'Editar Usuario' : 'Crear Usuario'}</DialogTitle>
+          <DialogTitle>
+            {editUserId ? 'EDITAR USUARIO' : 'CREAR USUARIO'}
+          </DialogTitle>
           <DialogContent>
-            <UsuarioForm userId={editUserId} onClose={handleClose} onSave={cargarUsuarios} />
+            <UsuarioForm
+              userId={editUserId}
+              onClose={handleClose}
+              onSave={cargarUsuarios}
+            />
           </DialogContent>
           <DialogActions>
-            <Button onClick={handleClose} color="secondary">
-              Cancelar
+            <Button onClick={handleClose} variant="contained" color="warning">
+              CANCELAR
             </Button>
           </DialogActions>
         </Dialog>

@@ -34,7 +34,10 @@ function Copyright(props) {
 const defaultTheme = createTheme();
 
 export const Login = () => {
-  const [credentials, setCredentials] = useState({ nombre_usuario: '', clave_usuario: '' });
+  const [credentials, setCredentials] = useState({
+    nombre_usuario: '',
+    clave_usuario: ''
+  });
   const navigate = useNavigate();
 
   const handleChange = (e) => {
@@ -62,8 +65,8 @@ export const Login = () => {
           'ID de usuario y tipo de usuario guardados en localStorage:',
           data.usuarioId,
           data.tipoUsuario
-        ); // Nuevo: imprimir el tipo de usuario en la consola
-        // navigate('/principal');
+        ); 
+        
         navigate('/dashboard');
       } else {
         alert(data.message);

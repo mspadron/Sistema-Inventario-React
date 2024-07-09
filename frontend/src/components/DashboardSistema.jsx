@@ -1,5 +1,16 @@
 import { useState, useEffect } from 'react';
 import { Grid, Card, CardContent, Typography, Box } from '@mui/material';
+import {
+  People,
+  Work,
+  LocalShipping,
+  Category,
+  Inventory,
+  Assignment,
+  ArrowDownward,
+  ArrowUpward,
+  TrendingUp
+} from '@mui/icons-material';
 import Navbar from './Navbar.jsx';
 
 const DashboardSistema = () => {
@@ -12,237 +23,153 @@ const DashboardSistema = () => {
   const [entriesCount, setEntriesCount] = useState(0);
   const [exitsCount, setExitsCount] = useState(0);
 
-  const contarUsuarios = async () => {
+  const fetchCounts = async (url, setCount) => {
     try {
-          const response = await fetch('http://localhost:4000/users');
-          const data = await response.json();
-          if (Array.isArray(data.usuarios)) {
-            setUsersCount(data.count);
-          } else {
-            console.error('Los datos de usuarios no son un array:', data);
-          }
-        } catch (error) {
-          console.error('Error al contar usuarios:', error);
-        }
-    }
-  
-    const contarRoles = async () => {
-      try {
-            const response = await fetch('http://localhost:4000/roles');
-            const data = await response.json();
-            if (Array.isArray(data.roles)) {
-              setRolesCount(data.count);
-            } else {
-              console.error('Los datos de roles no son un array:', data);
-            }
-          } catch (error) {
-            console.error('Error al contar roles:', error);
-          }
+      const response = await fetch(url);
+      const data = await response.json();
+      if (typeof data.count === 'number') {
+        setCount(data.count);
+      } else {
+        console.error(`Los datos de ${url} no contienen un campo count:`, data);
       }
-
-      const contarProveedor = async () => {
-        try {
-              const response = await fetch('http://localhost:4000/proveedores');
-              const data = await response.json();
-              if (Array.isArray(data.proveedores)) {
-                setProvidersCount(data.count);
-              } else {
-                console.error('Los datos de roles no son un array:', data);
-              }
-            } catch (error) {
-              console.error('Error al contar roles:', error);
-            }
-        }
-
-        const contarCategoria = async () => {
-          try {
-                const response = await fetch('http://localhost:4000/proveedores');
-                const data = await response.json();
-                if (Array.isArray(data.proveedores)) {
-                  setCategoriesCount(data.count);
-                } else {
-                  console.error('Los datos de roles no son un array:', data);
-                }
-              } catch (error) {
-                console.error('Error al contar roles:', error);
-              }
-          }
-
-          const contarProductos = async () => {
-            try {
-                  const response = await fetch('http://localhost:4000/productos');
-                  const data = await response.json();
-                  if (Array.isArray(data.productos)) {
-                    setProductsCount(data.count);
-                  } else {
-                    console.error('Los datos de roles no son un array:', data);
-                  }
-                } catch (error) {
-                  console.error('Error al contar roles:', error);
-                }
-            }
-
-            const contarExistencia = async () => {
-              try {
-                    const response = await fetch('http://localhost:4000/existencias');
-                    const data = await response.json();
-                    if (Array.isArray(data.existencias)) {
-                      setExistencesCount(data.count);
-                    } else {
-                      console.error('Los datos de roles no son un array:', data);
-                    }
-                  } catch (error) {
-                    console.error('Error al contar roles:', error);
-                  }
-              }
-
-              const contarEntrada = async () => {
-                try {
-                      const response = await fetch('http://localhost:4000/entradas');
-                      const data = await response.json();
-                      if (Array.isArray(data.entradas)) {
-                        setEntriesCount(data.count);
-                      } else {
-                        console.error('Los datos de roles no son un array:', data);
-                      }
-                    } catch (error) {
-                      console.error('Error al contar roles:', error);
-                    }
-                }
-
-                const contarSalida = async () => {
-                  try {
-                        const response = await fetch('http://localhost:4000/salidas');
-                        const data = await response.json();
-                        if (Array.isArray(data.salidas)) {
-                          setExitsCount(data.count);
-                        } else {
-                          console.error('Los datos de roles no son un array:', data);
-                        }
-                      } catch (error) {
-                        console.error('Error al contar roles:', error);
-                      }
-                  }
-    
-  
-
- 
+    } catch (error) {
+      console.error(`Error al contar datos de ${url}:`, error);
+    }
+  };
 
   useEffect(() => {
-    contarUsuarios();
-    contarRoles();
-    contarProveedor();
-    contarCategoria();
-    contarProductos();
-    contarExistencia();
-    contarEntrada();
-    contarSalida();
+    fetchCounts('http://localhost:4000/users', setUsersCount);
+    fetchCounts('http://localhost:4000/roles', setRolesCount);
+    fetchCounts('http://localhost:4000/proveedores', setProvidersCount);
+    fetchCounts('http://localhost:4000/categorias', setCategoriesCount);
+    fetchCounts('http://localhost:4000/productos', setProductsCount);
+    fetchCounts('http://localhost:4000/existencias', setExistencesCount);
+    fetchCounts('http://localhost:4000/entradas', setEntriesCount);
+    fetchCounts('http://localhost:4000/salidas', setExitsCount);
   }, []);
 
+  const cardStyles = {
+    padding: 2,
+    textAlign: 'center',
+    color: 'text.secondary',
+    boxShadow: 1,
+    borderRadius: 2,
+    border: '1px solid #e0e0e0'
+  };
+
+  const iconStyles = {
+    fontSize: 40,
+    color: 'primary.main',
+    mb: 1
+  };
+
+  const percentageStyles = {
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: '#e0f7fa',
+    borderRadius: '8px',
+    padding: '4px 8px',
+    color: '#00796b',
+    fontSize: '14px',
+    marginTop: '8px'
+  };
+
+  const additionalTextStyles = {
+    color: '#9e9e9e',
+    fontSize: '12px',
+    marginTop: '4px'
+  };
+
+  const calculatePercentage = (count) => {
+    return ((count / 100) * 100).toFixed(1) + '%';
+  };
+
+  const generateAdditionalText = (count) => {
+    return `Se han agregado ${Math.floor(count)} este año`;
+  };
+
+  const stats = [
+    {
+      key: 'users',
+      title: 'Usuarios',
+      count: usersCount,
+      icon: <People sx={iconStyles} />
+    },
+    {
+      key: 'roles',
+      title: 'Roles',
+      count: rolesCount,
+      icon: <Work sx={iconStyles} />
+    },
+    {
+      key: 'providers',
+      title: 'Proveedores',
+      count: providersCount,
+      icon: <LocalShipping sx={iconStyles} />
+    },
+    {
+      key: 'categories',
+      title: 'Categorías',
+      count: categoriesCount,
+      icon: <Category sx={iconStyles} />
+    },
+    {
+      key: 'products',
+      title: 'Productos',
+      count: productsCount,
+      icon: <Inventory sx={iconStyles} />
+    },
+    {
+      key: 'existences',
+      title: 'Existencias',
+      count: existencesCount,
+      icon: <Assignment sx={iconStyles} />
+    },
+    {
+      key: 'entries',
+      title: 'Entradas',
+      count: entriesCount,
+      icon: <ArrowDownward sx={iconStyles} />
+    },
+    {
+      key: 'exits',
+      title: 'Salidas',
+      count: exitsCount,
+      icon: <ArrowUpward sx={iconStyles} />
+    }
+  ];
+
   return (
-    <>
+    <Box sx={{ display: 'flex' }}>
       <Navbar />
-      <Box mt={4} mx="auto" maxWidth={800}>
+      <Box mt={2} mx="auto" maxWidth={1000} sx={{ p: 2 }}>
         <Grid container spacing={4} justifyContent="center">
-          <Grid item xs={12} sm={6} md={3}>
-            <Card>
-              <CardContent>
-                <Typography variant="h6" color="textSecondary" gutterBottom>
-                  Usuarios
-                </Typography>
-                <Typography variant="h3" component="div">
-                  {usersCount}
-                </Typography>
-              </CardContent>
-            </Card>
-          </Grid>
-          <Grid item xs={12} sm={6} md={3}>
-            <Card>
-              <CardContent>
-                <Typography variant="h6" color="textSecondary" gutterBottom>
-                  Roles
-                </Typography>
-                <Typography variant="h3" component="div">
-                  {rolesCount}
-                </Typography>
-              </CardContent>
-            </Card>
-          </Grid>
-          <Grid item xs={12} sm={6} md={3}>
-            <Card>
-              <CardContent>
-                <Typography variant="h6" color="textSecondary" gutterBottom>
-                  Proveedores
-                </Typography>
-                <Typography variant="h3" component="div">
-                  {providersCount}
-                </Typography>
-              </CardContent>
-            </Card>
-          </Grid>
-          <Grid item xs={12} sm={6} md={3}>
-            <Card>
-              <CardContent>
-                <Typography variant="h6" color="textSecondary" gutterBottom>
-                  Categorías
-                </Typography>
-                <Typography variant="h3" component="div">
-                  {categoriesCount}
-                </Typography>
-              </CardContent>
-            </Card>
-          </Grid>
-          <Grid item xs={12} sm={6} md={3}>
-            <Card>
-              <CardContent>
-                <Typography variant="h6" color="textSecondary" gutterBottom>
-                  Productos
-                </Typography>
-                <Typography variant="h3" component="div">
-                  {productsCount}
-                </Typography>
-              </CardContent>
-            </Card>
-          </Grid>
-          <Grid item xs={12} sm={6} md={3}>
-            <Card>
-              <CardContent>
-                <Typography variant="h6" color="textSecondary" gutterBottom>
-                  Existencias
-                </Typography>
-                <Typography variant="h3" component="div">
-                  {existencesCount}
-                </Typography>
-              </CardContent>
-            </Card>
-          </Grid>
-          <Grid item xs={12} sm={6} md={3}>
-            <Card>
-              <CardContent>
-                <Typography variant="h6" color="textSecondary" gutterBottom>
-                  Entradas
-                </Typography>
-                <Typography variant="h3" component="div">
-                  {entriesCount}
-                </Typography>
-              </CardContent>
-            </Card>
-          </Grid>
-          <Grid item xs={12} sm={6} md={3}>
-            <Card>
-              <CardContent>
-                <Typography variant="h6" color="textSecondary" gutterBottom>
-                  Salidas
-                </Typography>
-                <Typography variant="h3" component="div">
-                  {exitsCount}
-                </Typography>
-              </CardContent>
-            </Card>
-          </Grid>
+          {stats.map(({ key, title, count, icon }) => (
+            <Grid item xs={12} sm={6} md={3} key={key}>
+              <Card sx={cardStyles}>
+                <CardContent>
+                  {icon}
+                  <Typography variant="h6" color="textSecondary" gutterBottom>
+                    {title}
+                  </Typography>
+                  <Typography variant="h3" component="div">
+                    {count}
+                  </Typography>
+                  <Box sx={percentageStyles}>
+                    <TrendingUp sx={{ fontSize: 18, marginRight: 1 }} />
+                    {calculatePercentage(count)}
+                  </Box>
+                  <Typography sx={additionalTextStyles}>
+                    {generateAdditionalText(count)}
+                  </Typography>
+                </CardContent>
+              </Card>
+            </Grid>
+          ))}
         </Grid>
       </Box>
-    </>
+    </Box>
   );
 };
 

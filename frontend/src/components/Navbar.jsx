@@ -1,19 +1,68 @@
-import React, { useState } from 'react';
-import { Box, CssBaseline, Drawer, List, ListItem, ListItemIcon, ListItemText, Divider } from '@mui/material';
-import { Person as UserIcon, Store as StoreIcon, Inventory as InventoryIcon, Payment as PaymentIcon, Close as CloseIcon, Home as HomeIcon } from '@mui/icons-material';
+import React, { useState, useEffect } from 'react';
+import {
+  Box,
+  CssBaseline,
+  Drawer,
+  List,
+  ListItem,
+  ListItemIcon,
+  ListItemText,
+  Divider,
+  Tooltip,
+  Avatar
+} from '@mui/material';
+import {
+  Dashboard as DashboardIcon,
+  People as PeopleIcon,
+  LocalShipping,
+  Assignment,
+  Category as CategoryIcon,
+  ProductionQuantityLimits as ProductionQuantityLimitsIcon,
+  Inventory as InventoryIcon,
+  Input as InputIcon,
+  Output as OutputIcon,
+  Report as ReportIcon,
+  Close as CloseIcon
+} from '@mui/icons-material';
 import { Link, useNavigate } from 'react-router-dom';
+
+import adminImage from '../assets/images/admin.png';
+import bodegaImage from '../assets/images/bodega.png';
+import gerenteImage from '../assets/images/gerente.png';
+import gestorImage from '../assets/images/gestor.png';
 
 const drawerWidth = 240;
 
 const Navbar = () => {
   const navigate = useNavigate();
-  const tipoUsuario = localStorage.getItem('tipoUsuario');
   const [hoveredItem, setHoveredItem] = useState(null);
+  const [tipoUsuario, setTipoUsuario] = useState(localStorage.getItem('tipoUsuario'));
+  const [userName, setUserName] = useState(localStorage.getItem('userName'));
+
+  useEffect(() => {
+    if (!tipoUsuario) {
+      navigate('/');
+    } else {
+      // Fetch user info if needed, e.g., name
+      const fetchUserInfo = async () => {
+        try {
+          const response = await fetch(`http://localhost:4000/users/${localStorage.getItem('usuarioId')}`);
+          const data = await response.json();
+          setUserName(data.nombre_usuario);
+        } catch (error) {
+          console.error('Error fetching user info:', error);
+        }
+      };
+      fetchUserInfo();
+    }
+  }, [tipoUsuario, navigate]);
 
   const handleLogout = () => {
     localStorage.removeItem('token');
     localStorage.removeItem('usuarioId');
     localStorage.removeItem('tipoUsuario');
+    localStorage.removeItem('userName');
+    setTipoUsuario(null);
     navigate('/');
   };
 
@@ -25,37 +74,45 @@ const Navbar = () => {
     setHoveredItem(null);
   };
 
+  const userTypeInfo = {
+    '1': { name: 'Administrador', image: adminImage },
+    '2': { name: 'Bodega', image: bodegaImage },
+    '3': { name: 'Gerente', image: gerenteImage },
+    '4': { name: 'Gestor', image: gestorImage },
+  }[tipoUsuario];
+
   const renderMenuItems = () => {
     const menuItems = [];
 
-    if (tipoUsuario === '1') { // Administrador
+    if (tipoUsuario === '1') {
       menuItems.push(
-        { text: 'Dashboard', icon: <HomeIcon />, link: '/dashboard' },
-        { text: 'Usuarios', icon: <UserIcon />, link: '/dashUser' },
-        { text: 'Proveedores', icon: <StoreIcon />, link: '/dashProveedor' },
-        { text: 'Categorías', icon: <InventoryIcon />, link: '/dashCategoria' },
-        { text: 'Productos', icon: <InventoryIcon />, link: '/dashProducto' },
-        { text: 'Existencias', icon: <PaymentIcon />, link: '/dashExistencia' },
-        { text: 'Entradas', icon: <PaymentIcon />, link: '/dashEntrada' },
-        { text: 'Salidas', icon: <PaymentIcon />, link: '/dashSalida' },
-        { text: 'Existencias Mínimas', icon: <PaymentIcon />, link: '/reporteMinExis' }
+        { text: 'Dashboard', icon: <DashboardIcon />, link: '/dashboard' },
+        { text: 'Usuarios', icon: <PeopleIcon />, link: '/dashUser' },
+        { text: 'Proveedores', icon: <LocalShipping />, link: '/dashProveedor' },
+        { text: 'Categorías', icon: <CategoryIcon />, link: '/dashCategoria' },
+        { text: 'Productos', icon: <ProductionQuantityLimitsIcon />, link: '/dashProducto' },
+        { text: 'Existencias', icon: <Assignment />, link: '/dashExistencia' },
       );
-    } else if (tipoUsuario === '2') { // Bodega
+    } else if (tipoUsuario === '2') {
       menuItems.push(
-        { text: 'Dashboard', icon: <HomeIcon />, link: '/dashboard' },
-        { text: 'Existencias', icon: <PaymentIcon />, link: '/dashExistencia' }
+        { text: 'Dashboard', icon: <DashboardIcon />, link: '/dashboard' },
+        { text: 'Existencias', icon: <Assignment />, link: '/dashExistencia' },
+         { text: 'Entradas', icon: <InputIcon />, link: '/dashEntrada' },
+        { text: 'Salidas', icon: <OutputIcon />, link: '/dashSalida' },
+        { text: 'Existencias Mínimas', icon: <ReportIcon />, link: '/reporteMinExis' }
+
       );
-    } else if (tipoUsuario === '3') { // Gerente
+    } else if (tipoUsuario === '3') {
       menuItems.push(
-        { text: 'Dashboard', icon: <HomeIcon />, link: '/dashboard' },
-        { text: 'Entradas', icon: <PaymentIcon />, link: '/dashEntrada' },
-        { text: 'Salidas', icon: <PaymentIcon />, link: '/dashSalida' },
-        { text: 'Existencias Mínimas', icon: <PaymentIcon />, link: '/reporteMinExis' }
+        { text: 'Dashboard', icon: <DashboardIcon />, link: '/dashboard' },
+        { text: 'Entradas', icon: <InputIcon />, link: '/dashEntrada' },
+        { text: 'Salidas', icon: <OutputIcon />, link: '/dashSalida' },
+        { text: 'Existencias Mínimas', icon: <ReportIcon />, link: '/reporteMinExis' }
       );
-    } else if (tipoUsuario === '4') { // Gestor
+    } else if (tipoUsuario === '4') {
       menuItems.push(
-        { text: 'Dashboard', icon: <HomeIcon />, link: '/dashboard' },
-        { text: 'Proveedores', icon: <StoreIcon />, link: '/dashProveedor' },
+        { text: 'Dashboard', icon: <DashboardIcon />, link: '/dashboard' },
+        { text: 'Proveedores', icon: <LocalShipping />, link: '/dashProveedor' },
         { text: 'Categorías', icon: <InventoryIcon />, link: '/dashCategoria' },
         { text: 'Productos', icon: <InventoryIcon />, link: '/dashProducto' }
       );
@@ -64,37 +121,40 @@ const Navbar = () => {
     return (
       <List sx={{ flexGrow: 1, display: 'flex', flexDirection: 'column' }}>
         {menuItems.map((item, index) => (
-          <ListItem
-            key={index}
-            button
-            component={item.link ? Link : 'button'}
-            to={item.link}
-            onClick={item.action}
-            sx={{
-              '&:hover': {
-                backgroundColor: '#2c3848',
-                '& .MuiListItemIcon-root': {
-                  color: '#FFF'
+          <Tooltip key={index} title={item.text} arrow placement="right">
+            <ListItem
+              button
+              component={Link}
+              to={item.link}
+              onClick={item.action}
+              sx={{
+                '&:hover': {
+                  backgroundColor: '#2c3848',
+                  '& .MuiListItemIcon-root': {
+                    color: '#FFF'
+                  },
+                  '& .MuiListItemText-primary': {
+                    color: '#FFF'
+                  }
                 },
-                '& .MuiListItemText-primary': {
-                  color: '#FFF'
-                }
-              },
-              backgroundColor: hoveredItem === index ? '#2c3848' : 'transparent'
-            }}
-            onMouseEnter={() => handleMouseEnter(index)}
-            onMouseLeave={handleMouseLeave}
-          >
-            <ListItemIcon sx={{ color: '#FFF' }}>{item.icon}</ListItemIcon>
-            <ListItemText primary={item.text} />
-          </ListItem>
+                backgroundColor:
+                  hoveredItem === index ? '#2c3848' : 'transparent'
+              }}
+              onMouseEnter={() => handleMouseEnter(index)}
+              onMouseLeave={handleMouseLeave}
+            >
+              <ListItemIcon sx={{ color: '#FFF' }}>{item.icon}</ListItemIcon>
+              <ListItemText primary={item.text} />
+            </ListItem>
+          </Tooltip>
         ))}
-        <Divider /> {/* Añade una línea divisoria después de los elementos del menú */}
+        <Divider />
         <ListItem
           button
           onClick={handleLogout}
           sx={{
-            backgroundColor: hoveredItem === menuItems.length ? '#2c3848' : 'transparent',
+            backgroundColor:
+              hoveredItem === menuItems.length ? '#2c3848' : 'transparent',
             marginTop: 'auto',
             '&:hover': {
               backgroundColor: '#2c3848',
@@ -139,6 +199,26 @@ const Navbar = () => {
           }
         }}
       >
+        <Box
+          sx={{
+            display: 'flex',
+            flexDirection: 'column',
+            alignItems: 'center',
+            mt: 2,
+            mb: 2,
+            p: 2
+          }}
+        >
+          <Avatar
+            src={userTypeInfo?.image}
+            alt={userTypeInfo?.name}
+            sx={{ width: 90, height: 90}}
+          />
+          <Box sx={{ textAlign: 'center', color: '#FFF' }}>
+            <h3>Bienvenido, {userName}</h3>
+            <p>{userTypeInfo?.name}</p>
+          </Box>
+        </Box>
         {renderMenuItems()}
       </Drawer>
     </Box>

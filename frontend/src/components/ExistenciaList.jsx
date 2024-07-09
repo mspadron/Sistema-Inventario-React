@@ -3,6 +3,7 @@ import {
   Table,
   TableBody,
   TableCell,
+  tableCellClasses,
   TableContainer,
   TableHead,
   TableRow,
@@ -11,12 +12,34 @@ import {
   Dialog,
   DialogTitle,
   DialogContent,
-  DialogActions,
+  DialogActions
 } from '@mui/material';
 import { useEffect, useState } from 'react';
 import Navbar from './Navbar.jsx';
 import ExistenciaForm from './ExistenciaForm.jsx';
 import MovimientoForm from './MovimientoForm.jsx';
+
+import { styled } from '@mui/material/styles';
+
+const StyledTableCell = styled(TableCell)(({ theme }) => ({
+  [`&.${tableCellClasses.head}`]: {
+    backgroundColor: '#02152B',
+    color: theme.palette.common.white
+  },
+  [`&.${tableCellClasses.body}`]: {
+    fontSize: 14
+  }
+}));
+
+const StyledTableRow = styled(TableRow)(({ theme }) => ({
+  '&:nth-of-type(odd)': {
+    backgroundColor: theme.palette.action.hover
+  },
+  // hide last border
+  '&:last-child td, &:last-child th': {
+    border: 0
+  }
+}));
 
 function ExistenciaList() {
   const [existencias, setExistencias] = useState([]);
@@ -31,11 +54,16 @@ function ExistenciaList() {
       const data = await response.json();
       if (Array.isArray(data.existencias)) {
         const existenciasUnicas = data.existencias.reduce((acc, existencia) => {
-          const found = acc.find(e => e.id_existencia === existencia.id_existencia);
+          const found = acc.find(
+            (e) => e.id_existencia === existencia.id_existencia
+          );
           if (found) {
             found.gestionada_por += `, ${existencia.gestionada_por}`;
           } else {
-            acc.push({ ...existencia, gestionada_por: existencia.gestionada_por });
+            acc.push({
+              ...existencia,
+              gestionada_por: existencia.gestionada_por
+            });
           }
           return acc;
         }, []);
@@ -75,74 +103,104 @@ function ExistenciaList() {
   return (
     <Box sx={{ display: 'flex' }}>
       <Navbar />
-      <Box component="main" sx={{ flexGrow: 1, p: 3, marginLeft: '20px' }}>
-        <h1>Lista de Existencias</h1>
-        <Button variant="contained" color="primary" onClick={handleOpen}>
+      <Box
+        component="main"
+        sx={{ flexGrow: 1, paddingRight: 4, marginLeft: '40px' }}
+      >
+        <h1>LISTA DE EXISTENCIAS</h1>
+        <Button variant="contained" color="secondary" onClick={handleOpen}>
           Nueva Existencia
         </Button>
         <TableContainer component={Paper} sx={{ marginTop: '1rem' }}>
-          <Table>
+          <Table sx={{ minWidth: 700 }} aria-label="customized table">
             <TableHead>
               <TableRow>
-                <TableCell>Categoria</TableCell>
-                <TableCell>Producto</TableCell>
-                <TableCell>Proveedor</TableCell>
-                <TableCell>Stock Inicial</TableCell>
-                <TableCell>Stock Actual</TableCell>
-                <TableCell>Precio Compra</TableCell>
-                <TableCell>Precio Venta</TableCell>
-                <TableCell>Gestionada por</TableCell>
-                <TableCell>Acciones</TableCell>
+                <StyledTableCell>Categoria</StyledTableCell>
+                <StyledTableCell align="right">Producto</StyledTableCell>
+                <StyledTableCell align="right">Proveedor</StyledTableCell>
+                <StyledTableCell align="right">Stock Inicial</StyledTableCell>
+                <StyledTableCell align="right">Stock Actual</StyledTableCell>
+                <StyledTableCell align="right">Precio Compra</StyledTableCell>
+                <StyledTableCell align="right">Precio Venta</StyledTableCell>
+                <StyledTableCell align="right">Responsable</StyledTableCell>
+                <StyledTableCell align="right">Acciones</StyledTableCell>
               </TableRow>
             </TableHead>
             <TableBody>
               {existencias.map((existencia) => (
-                <TableRow key={existencia.id_existencia}>
-                  <TableCell>{existencia.nombre_categoria}</TableCell>
-                  <TableCell>{existencia.nombre_producto}</TableCell>
-                  <TableCell>{existencia.nombre_proveedor}</TableCell>
-                  <TableCell>{existencia.stockinicial_existencia}</TableCell>
-                  <TableCell>{existencia.stockactual_existencia}</TableCell>
-                  <TableCell>{existencia.preciocompra_existencia}</TableCell>
-                  <TableCell>{existencia.precioventa_existencia}</TableCell>
-                  <TableCell>{existencia.gestionada_por}</TableCell>
-                  <TableCell>
+                <StyledTableRow key={existencia.id_existencia}>
+                  <StyledTableCell component="th" scope="row">
+                    {existencia.nombre_categoria}
+                  </StyledTableCell>
+                  <StyledTableCell align="right">
+                    {existencia.nombre_producto}
+                  </StyledTableCell>
+                  <StyledTableCell align="right">
+                    {existencia.nombre_proveedor}
+                  </StyledTableCell>
+                  <StyledTableCell align="right">
+                    {existencia.stockinicial_existencia}
+                  </StyledTableCell>
+                  <StyledTableCell align="right">
+                    {existencia.stockactual_existencia}
+                  </StyledTableCell>
+                  <StyledTableCell align="right">
+                    {existencia.preciocompra_existencia}
+                  </StyledTableCell>
+                  <StyledTableCell align="right">
+                    {existencia.precioventa_existencia}
+                  </StyledTableCell>
+                  <StyledTableCell align="right">
+                    {existencia.gestionada_por}
+                  </StyledTableCell>
+                  <StyledTableCell align="right">
                     <Button
                       variant="contained"
-                      color="primary"
-                      onClick={() => handleOpenMovimiento(existencia, 'entrada')}
+                      color="success"
+                      onClick={() =>
+                        handleOpenMovimiento(existencia, 'entrada')
+                      }
                       sx={{ marginRight: '0.5rem' }}
                     >
                       Entrada
                     </Button>
                     <Button
                       variant="contained"
-                      color="secondary"
+                      color="error"
                       onClick={() => handleOpenMovimiento(existencia, 'salida')}
                     >
                       Salida
                     </Button>
-                  </TableCell>
-                </TableRow>
+                  </StyledTableCell>
+                </StyledTableRow>
               ))}
             </TableBody>
           </Table>
         </TableContainer>
 
         <Dialog open={open} onClose={handleClose} maxWidth="sm" fullWidth>
-          <DialogTitle>Crear Nueva Existencia</DialogTitle>
+          <DialogTitle>NUEVA EXISTENCIA</DialogTitle>
           <DialogContent>
             <ExistenciaForm onClose={handleClose} onSave={cargarExistencias} />
           </DialogContent>
           <DialogActions>
-            <Button onClick={handleClose} color="secondary">
+            <Button onClick={handleClose} variant="contained" color="warning">
               Cancelar
             </Button>
           </DialogActions>
         </Dialog>
 
-        <Dialog open={openMovimiento} onClose={handleCloseMovimiento} maxWidth="sm" fullWidth>
-          <DialogTitle>{movimientoTipo === 'entrada' ? 'Registrar Entrada' : 'Registrar Salida'}</DialogTitle>
+        <Dialog
+          open={openMovimiento}
+          onClose={handleCloseMovimiento}
+          maxWidth="sm"
+          fullWidth
+        >
+          <DialogTitle>
+            {movimientoTipo === 'entrada'
+              ? 'REGISTRAR ENTRADA'
+              : 'REGISTRAR SALIDA'}
+          </DialogTitle>
           <DialogContent>
             {selectedExistencia && (
               <MovimientoForm
@@ -154,7 +212,11 @@ function ExistenciaList() {
             )}
           </DialogContent>
           <DialogActions>
-            <Button onClick={handleCloseMovimiento} color="secondary">
+            <Button
+              onClick={handleCloseMovimiento}
+              variant="contained"
+              color="secondary"
+            >
               Cancelar
             </Button>
           </DialogActions>
