@@ -19,6 +19,9 @@ import Navbar from './Navbar.jsx';
 import CategoriaForm from './CategoriaForm.jsx';
 
 import { styled } from '@mui/material/styles';
+import alertify from 'alertifyjs';
+import 'alertifyjs/build/css/alertify.css';
+import 'alertifyjs/build/css/themes/default.css';
 
 const StyledTableCell = styled(TableCell)(({ theme }) => ({
   [`&.${tableCellClasses.head}`]: {
@@ -60,16 +63,33 @@ function CategoriaList() {
   };
 
   const handleDelete = async (id) => {
-    try {
-      await fetch(`http://localhost:4000/categorias/${id}`, {
-        method: 'DELETE'
+    alertify.confirm("Eliminar Categoría", "¿Está seguro de que desea eliminar esta categoría?",
+      async function () {
+        try {
+          const response = await fetch(`http://localhost:4000/categorias/${id}`, {
+            method: 'DELETE'
+          });
+
+          if (response.ok) {
+            setCategorias(categorias.filter((categoria) => categoria.id_categoria !== id));
+            alertify.success('Categoría eliminada correctamente');
+          } else {
+            const result = await response.json();
+            const errorMessage = result.message || 'Error al eliminar la categoría';
+            if (errorMessage.includes('violates foreign key constraint')) {
+              alertify.error('La categoría no puede ser eliminada, está relacionada con un producto');
+            } else {
+              alertify.error(errorMessage);
+            }
+          }
+        } catch (error) {
+          console.error('Error al eliminar categoría:', error);
+          alertify.error('Error al eliminar la categoría');
+        }
+      },
+      function () {
+        alertify.error('Cancelado');
       });
-      setCategorias(
-        categorias.filter((categoria) => categoria.id_categoria !== id)
-      );
-    } catch (error) {
-      console.error('Error al eliminar categoría:', error);
-    }
   };
 
   const handleOpen = (id = null) => {
@@ -121,9 +141,9 @@ function CategoriaList() {
                       variant="contained"
                       sx={{
                         backgroundColor: '#FFA000',
-                        color: 'white', // Cambia el color del texto si es necesario
+                        color: 'white',
                         '&:hover': {
-                          backgroundColor: '#FFA001' // Color al hacer hover
+                          backgroundColor: '#FFA001'
                         }
                       }}
                       onClick={() => handleOpen(categoria.id_categoria)}

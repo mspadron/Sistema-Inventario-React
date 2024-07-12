@@ -12,32 +12,35 @@ import {
   Dialog,
   DialogTitle,
   DialogContent,
-  DialogActions
+  DialogActions,
 } from '@mui/material';
 import { useEffect, useState } from 'react';
 import Navbar from './Navbar.jsx';
 import ProveedorForm from './ProveedorForm.jsx';
+import alertify from 'alertifyjs';
+import 'alertifyjs/build/css/alertify.css';
+import 'alertifyjs/build/css/themes/default.css';
 
 import { styled } from '@mui/material/styles';
 
 const StyledTableCell = styled(TableCell)(({ theme }) => ({
   [`&.${tableCellClasses.head}`]: {
     backgroundColor: '#02152B',
-    color: theme.palette.common.white
+    color: theme.palette.common.white,
   },
   [`&.${tableCellClasses.body}`]: {
-    fontSize: 14
-  }
+    fontSize: 14,
+  },
 }));
 
 const StyledTableRow = styled(TableRow)(({ theme }) => ({
   '&:nth-of-type(odd)': {
-    backgroundColor: theme.palette.action.hover
+    backgroundColor: theme.palette.action.hover,
   },
   // hide last border
   '&:last-child td, &:last-child th': {
-    border: 0
-  }
+    border: 0,
+  },
 }));
 
 function ProveedorList() {
@@ -56,20 +59,46 @@ function ProveedorList() {
       }
     } catch (error) {
       console.error('Error al cargar proveedores:', error);
+      alertify.error('Error al cargar proveedores');
     }
   };
 
   const handleDelete = async (id) => {
-    try {
-      await fetch(`http://localhost:4000/proveedores/${id}`, {
-        method: 'DELETE'
-      });
-      setProveedores(
-        proveedores.filter((proveedor) => proveedor.id_proveedor !== id)
-      );
-    } catch (error) {
-      console.error('Error al eliminar proveedor:', error);
-    }
+    alertify.confirm(
+      'Eliminar Proveedor',
+      '¿Está seguro de que desea eliminar este proveedor?',
+      async function () {
+        try {
+          const response = await fetch(`http://localhost:4000/proveedores/${id}`, {
+            method: 'DELETE',
+          });
+
+          if (response.ok) {
+            setProveedores(
+              proveedores.filter((proveedor) => proveedor.id_proveedor !== id)
+            );
+            alertify.success('Proveedor eliminado correctamente');
+          } else {
+            const result = await response.json();
+            const errorMessage =
+              result.message || 'Error al eliminar el proveedor';
+            if (errorMessage.includes('violates foreign key constraint')) {
+              alertify.error(
+                'El proveedor no puede ser eliminado, está relacionado con otras tablas'
+              );
+            } else {
+              alertify.error(errorMessage);
+            }
+          }
+        } catch (error) {
+          console.error('Error al eliminar proveedor:', error);
+          alertify.error('Error al eliminar proveedor');
+        }
+      },
+      function () {
+        alertify.error('Cancelado');
+      }
+    );
   };
 
   const handleOpen = (id = null) => {
@@ -129,10 +158,10 @@ function ProveedorList() {
                       variant="contained"
                       sx={{
                         backgroundColor: '#FFA000',
-                        color: 'white', // Cambia el color del texto si es necesario
+                        color: 'white',
                         '&:hover': {
-                          backgroundColor: '#FFA001' // Color al hacer hover
-                        }
+                          backgroundColor: '#FFA001',
+                        },
                       }}
                       onClick={() => handleOpen(proveedor.id_proveedor)}
                     >

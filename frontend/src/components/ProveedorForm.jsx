@@ -7,6 +7,9 @@ import {
   TextField
 } from '@mui/material';
 import { useState, useEffect } from 'react';
+import alertify from 'alertifyjs';
+import 'alertifyjs/build/css/alertify.css';
+import 'alertifyjs/build/css/themes/default.css';
 
 function ProveedorForm({ proveedorId, onClose, onSave }) {
   const [proveedor, setProveedor] = useState({
@@ -31,6 +34,7 @@ function ProveedorForm({ proveedorId, onClose, onSave }) {
         } catch (error) {
           console.error('Error al cargar proveedor:', error);
           setLoadingProveedor(false);
+          alertify.error('Error al cargar el proveedor');
         }
       }
     };
@@ -38,8 +42,46 @@ function ProveedorForm({ proveedorId, onClose, onSave }) {
     fetchProveedor();
   }, [proveedorId]);
 
+  const validateForm = () => {
+    const { nombre_proveedor, correo_proveedor, telefono } = proveedor;
+
+    if (!nombre_proveedor.trim()) {
+      alertify.error('El campo nombre del proveedor no debe estar vacío');
+      return false;
+    }
+
+    if (!/^[a-zA-Z0-9\s]+$/.test(nombre_proveedor)) {
+      alertify.error('El nombre del proveedor solo puede contener letras y números');
+      return false;
+    }
+
+    if (!correo_proveedor.trim()) {
+      alertify.error('El campo correo no debe estar vacío');
+      return false;
+    }
+
+    if (!/^[a-z]+@[a-z]+\.[a-z]+(\.[a-z]+)*$/.test(correo_proveedor)) {
+      alertify.error('El correo no tiene un formato válido');
+      return false;
+    }
+
+    if (!telefono.trim()) {
+      alertify.error('El campo teléfono no debe estar vacío');
+      return false;
+    }
+
+    if (!/^\d{10}$/.test(telefono)) {
+      alertify.error('El teléfono debe contener solo números y tener 10 dígitos');
+      return false;
+    }
+
+    return true;
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
+    if (!validateForm()) return;
+
     setLoading(true);
     try {
       const url = proveedorId
@@ -52,12 +94,21 @@ function ProveedorForm({ proveedorId, onClose, onSave }) {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(proveedor)
       });
-      await response.json();
-      setLoading(false);
-      onSave();
-      onClose();
+
+      if (response.ok) {
+        alertify.success(`Proveedor ${proveedorId ? 'editado' : 'creado'} correctamente`);
+        await response.json();
+        onSave();
+        onClose();
+      } else {
+        const result = await response.json();
+        const errorMessage = result.message || 'Error al guardar el proveedor';
+        alertify.error(errorMessage);
+      }
     } catch (error) {
       console.error(error);
+      alertify.error('Error al guardar el proveedor');
+    } finally {
       setLoading(false);
     }
   };
@@ -122,6 +173,7 @@ function ProveedorForm({ proveedorId, onClose, onSave }) {
               fullWidth
               type="submit"
               style={{ marginTop: '1rem' }}
+              disabled={loading}
             >
               {loading ? (
                 <CircularProgress color="inherit" size={24} />

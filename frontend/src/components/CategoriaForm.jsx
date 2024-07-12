@@ -7,6 +7,9 @@ import {
   TextField
 } from '@mui/material';
 import { useState, useEffect } from 'react';
+import alertify from 'alertifyjs';
+import 'alertifyjs/build/css/alertify.css';
+import 'alertifyjs/build/css/themes/default.css';
 
 function CategoriaForm({ categoriaId, onClose, onSave }) {
   const [categoria, setCategoria] = useState({
@@ -29,6 +32,7 @@ function CategoriaForm({ categoriaId, onClose, onSave }) {
         } catch (error) {
           console.error('Error al cargar categoría:', error);
           setLoadingCategoria(false);
+          alertify.error('Error al cargar la categoría');
         }
       }
     };
@@ -38,6 +42,17 @@ function CategoriaForm({ categoriaId, onClose, onSave }) {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+
+    if (!categoria.nombre_categoria.trim()) {
+      alertify.error('El campo no debe estar vacío');
+      return;
+    }
+
+    if (!/^[a-zA-Z\s]+$/.test(categoria.nombre_categoria)) {
+      alertify.error('El nombre de la categoría solo debe contener letras');
+      return;
+    }
+
     setLoading(true);
     try {
       const url = categoriaId
@@ -50,12 +65,21 @@ function CategoriaForm({ categoriaId, onClose, onSave }) {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(categoria)
       });
-      await response.json();
-      setLoading(false);
-      onSave();
-      onClose();
+
+      if (response.ok) {
+        alertify.success(`Categoría ${categoriaId ? 'editada' : 'creada'} correctamente`);
+        await response.json();
+        onSave();
+        onClose();
+      } else {
+        const result = await response.json();
+        const errorMessage = result.message || 'Error al guardar la categoría';
+        alertify.error(errorMessage);
+      }
     } catch (error) {
       console.error(error);
+      alertify.error('Error al guardar la categoría');
+    } finally {
       setLoading(false);
     }
   };
@@ -86,7 +110,7 @@ function CategoriaForm({ categoriaId, onClose, onSave }) {
                   name="nombre_categoria"
                   value={categoria.nombre_categoria || ''}
                   onChange={handleChange}
-                  inputProps={{ style: { color: 'black' } }} // Asegurando que el texto sea negro
+                  inputProps={{ style: { color: 'black' } }} 
                 />
               </Grid>
             </Grid>
@@ -96,6 +120,7 @@ function CategoriaForm({ categoriaId, onClose, onSave }) {
               fullWidth
               type="submit"
               style={{ marginTop: '1rem' }}
+              disabled={loading}
             >
               {loading ? (
                 <CircularProgress color="inherit" size={24} />

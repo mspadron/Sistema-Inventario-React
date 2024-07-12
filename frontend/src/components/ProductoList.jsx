@@ -17,8 +17,10 @@ import {
 import { useEffect, useState } from 'react';
 import Navbar from './Navbar.jsx';
 import ProductoForm from './ProductoForm.jsx';
-
 import { styled } from '@mui/material/styles';
+import alertify from 'alertifyjs';
+import 'alertifyjs/build/css/alertify.css';
+import 'alertifyjs/build/css/themes/default.css';
 
 const StyledTableCell = styled(TableCell)(({ theme }) => ({
   [`&.${tableCellClasses.head}`]: {
@@ -34,7 +36,6 @@ const StyledTableRow = styled(TableRow)(({ theme }) => ({
   '&:nth-of-type(odd)': {
     backgroundColor: theme.palette.action.hover
   },
-  // hide last border
   '&:last-child td, &:last-child th': {
     border: 0
   }
@@ -82,14 +83,33 @@ function ProductoList() {
   };
 
   const handleDelete = async (id) => {
-    try {
-      await fetch(`http://localhost:4000/productos/${id}`, {
-        method: 'DELETE'
+    alertify.confirm("Eliminar Producto", "¿Está seguro de que desea eliminar este producto?",
+      async function () {
+        try {
+          const response = await fetch(`http://localhost:4000/productos/${id}`, {
+            method: 'DELETE'
+          });
+
+          if (response.ok) {
+            setProductos(productos.filter((producto) => producto.id_producto !== id));
+            alertify.success('Producto eliminado correctamente');
+          } else {
+            const result = await response.json();
+            const errorMessage = result.message || 'Error al eliminar el producto';
+            if (errorMessage.includes('violates foreign key constraint')) {
+              alertify.error('El producto no puede ser eliminado, está relacionado con otras tablas');
+            } else {
+              alertify.error(errorMessage);
+            }
+          }
+        } catch (error) {
+          console.error('Error al eliminar producto:', error);
+          alertify.error('Error al eliminar el producto');
+        }
+      },
+      function () {
+        alertify.error('Cancelado');
       });
-      setProductos(productos.filter((producto) => producto.id_producto !== id));
-    } catch (error) {
-      console.error('Error al eliminar producto:', error);
-    }
   };
 
   const handleOpen = (id = null) => {

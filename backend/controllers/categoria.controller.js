@@ -46,7 +46,7 @@ export const getCategoria = async (req, res,next) => {
   }
 };
 
-export const updateCategoria = async (req, res) => {
+export const updateCategoria = async (req, res,next) => {
   try {
     const { id } = req.params;
     const { nombre_categoria } = req.body;
@@ -65,7 +65,7 @@ export const updateCategoria = async (req, res) => {
   }
 };
 
-export const deleteCategoria = async (req, res) => {
+export const deleteCategoria = async (req, res,next) => {
   try {
     const { id } = req.params;
     const result = await pool.query('DELETE FROM categoria WHERE id_categoria = $1', [id]);

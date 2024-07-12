@@ -11,6 +11,9 @@ import {
   TextField
 } from '@mui/material';
 import { useState, useEffect } from 'react';
+import alertify from 'alertifyjs';
+import 'alertifyjs/build/css/alertify.css';
+import 'alertifyjs/build/css/themes/default.css';
 
 function ProductoForm({ productoId, onClose, onSave }) {
   const [producto, setProducto] = useState({
@@ -63,8 +66,47 @@ function ProductoForm({ productoId, onClose, onSave }) {
     fetchProducto();
   }, [productoId]);
 
+  const validateForm = () => {
+    const { id_categoria, nombre_producto, precio_producto, fecha_expiracion_producto } = producto;
+
+    if (!id_categoria) {
+      alertify.error('Debe seleccionar una categoría');
+      return false;
+    }
+
+    if (!nombre_producto.trim()) {
+      alertify.error('El campo nombre del producto no debe estar vacío');
+      return false;
+    }
+
+    if (!precio_producto.trim()) {
+      alertify.error('El campo precio no debe estar vacío');
+      return false;
+    }
+
+    if (!/^\d+(\.\d+)?$/.test(precio_producto)) {
+      alertify.error('El campo precio solo admite números y números flotantes con punto decimal');
+      return false;
+    }
+
+    if (!fecha_expiracion_producto) {
+      alertify.error('El campo fecha de expiración no debe estar vacío');
+      return false;
+    }
+
+    const currentDate = new Date().toISOString().split('T')[0];
+    if (fecha_expiracion_producto <= currentDate) {
+      alertify.error('La fecha de expiración no puede ser la fecha actual o una fecha pasada');
+      return false;
+    }
+
+    return true;
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
+    if (!validateForm()) return;
+
     setLoading(true);
     try {
       const url = productoId
@@ -77,12 +119,21 @@ function ProductoForm({ productoId, onClose, onSave }) {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(producto)
       });
-      await response.json();
-      setLoading(false);
-      onSave();
-      onClose();
+
+      if (response.ok) {
+        alertify.success(`Producto ${productoId ? 'editado' : 'creado'} correctamente`);
+        await response.json();
+        onSave();
+        onClose();
+      } else {
+        const result = await response.json();
+        const errorMessage = result.message || 'Error al guardar el producto';
+        alertify.error(errorMessage);
+      }
     } catch (error) {
       console.error(error);
+      alertify.error('Error al guardar el producto');
+    } finally {
       setLoading(false);
     }
   };
@@ -140,7 +191,7 @@ function ProductoForm({ productoId, onClose, onSave }) {
                   name="nombre_producto"
                   value={producto.nombre_producto || ''}
                   onChange={handleChange}
-                  inputProps={{ style: { color: 'black' } }} // Texto en negro
+                  inputProps={{ style: { color: 'black' } }}
                 />
               </Grid>
             </Grid>
@@ -152,7 +203,7 @@ function ProductoForm({ productoId, onClose, onSave }) {
               name="precio_producto"
               value={producto.precio_producto || ''}
               onChange={handleChange}
-              inputProps={{ style: { color: 'black' } }} // Texto en negro
+              inputProps={{ style: { color: 'black' } }}
             />
             <TextField
               variant="filled"
@@ -164,14 +215,15 @@ function ProductoForm({ productoId, onClose, onSave }) {
               value={producto.fecha_expiracion_producto || ''}
               onChange={handleChange}
               InputLabelProps={{ shrink: true }}
-              inputProps={{ style: { color: 'black' } }} // Texto en negro
+              inputProps={{ style: { color: 'black' } }}
             />
             <Button
               variant="contained"
               color="primary"
               type="submit"
-              fullWidth // El botón ocupa todo el ancho del formulario
+              fullWidth
               sx={{ marginTop: '1rem' }}
+              disabled={loading}
             >
               {loading ? (
                 <CircularProgress color="inherit" size={24} />

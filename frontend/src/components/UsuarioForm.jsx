@@ -11,6 +11,9 @@ import {
   TextField
 } from '@mui/material';
 import { useState, useEffect } from 'react';
+import alertify from 'alertifyjs';
+import 'alertifyjs/build/css/alertify.css';
+import 'alertifyjs/build/css/themes/default.css';
 
 function UsuarioForm({ userId, onClose, onSave }) {
   const [usuario, setUsuario] = useState({
@@ -44,6 +47,7 @@ function UsuarioForm({ userId, onClose, onSave }) {
         } catch (error) {
           console.error('Error al cargar usuario:', error);
           setLoadingUser(false);
+          alertify.error('Error al cargar el usuario');
         }
       }
     };
@@ -52,8 +56,42 @@ function UsuarioForm({ userId, onClose, onSave }) {
     fetchUsuario();
   }, [userId]);
 
+  const validateForm = () => {
+    const { id_rol, nombre_usuario, clave_usuario } = usuario;
+
+    if (!id_rol) {
+      alertify.error('Debe seleccionar un rol');
+      return false;
+    }
+
+    if (!nombre_usuario.trim()) {
+      alertify.error('El campo nombre de usuario no debe estar vacío');
+      return false;
+    }
+
+    if (!/^[A-Z][a-zA-Z]*(_[A-Z][a-zA-Z]*)*$/.test(nombre_usuario)) {
+      alertify.error(
+        'El nombre de usuario debe comenzar con mayúscula, no debe contener espacios y cada palabra unida por "_" debe comenzar con mayúscula'
+      );
+      return false;
+    }
+
+    if (
+      !/(?=.*[A-Z])(?=.*\d.*\d)(?=.*[a-zA-Z]).{8,}/.test(clave_usuario)
+    ) {
+      alertify.error(
+        'La clave debe tener al menos 8 caracteres, contener letras y números, al menos una mayúscula y dos números'
+      );
+      return false;
+    }
+
+    return true;
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
+    if (!validateForm()) return;
+
     setLoading(true);
     try {
       const url = userId
@@ -66,12 +104,21 @@ function UsuarioForm({ userId, onClose, onSave }) {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(usuario)
       });
-      await response.json();
-      setLoading(false);
-      onSave();
-      onClose();
+
+      if (response.ok) {
+        alertify.success(`Usuario ${userId ? 'editado' : 'creado'} correctamente`);
+        await response.json();
+        onSave();
+        onClose();
+      } else {
+        const result = await response.json();
+        const errorMessage = result.message || 'Error al guardar el usuario';
+        alertify.error(errorMessage);
+      }
     } catch (error) {
       console.error(error);
+      alertify.error('Error al guardar el usuario');
+    } finally {
       setLoading(false);
     }
   };
@@ -145,6 +192,7 @@ function UsuarioForm({ userId, onClose, onSave }) {
               fullWidth
               type="submit"
               style={{ marginTop: '1rem' }}
+              disabled={loading}
             >
               {loading ? (
                 <CircularProgress color="inherit" size={24} />

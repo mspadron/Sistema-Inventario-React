@@ -17,8 +17,10 @@ import {
 import { useEffect, useState } from 'react';
 import Navbar from './Navbar.jsx';
 import UsuarioForm from './UsuarioForm.jsx';
-
 import { styled } from '@mui/material/styles';
+import alertify from 'alertifyjs';
+import 'alertifyjs/build/css/alertify.css';
+import 'alertifyjs/build/css/themes/default.css';
 
 const StyledTableCell = styled(TableCell)(({ theme }) => ({
   [`&.${tableCellClasses.head}`]: {
@@ -34,7 +36,6 @@ const StyledTableRow = styled(TableRow)(({ theme }) => ({
   '&:nth-of-type(odd)': {
     backgroundColor: theme.palette.action.hover
   },
-  // hide last border
   '&:last-child td, &:last-child th': {
     border: 0
   }
@@ -80,14 +81,33 @@ function UsuarioList() {
   };
 
   const handleDelete = async (id) => {
-    try {
-      await fetch(`http://localhost:4000/users/${id}`, {
-        method: 'DELETE'
+    alertify.confirm("Eliminar Usuario", "¿Está seguro de que desea eliminar este usuario?",
+      async function () {
+        try {
+          const response = await fetch(`http://localhost:4000/users/${id}`, {
+            method: 'DELETE'
+          });
+
+          if (response.ok) {
+            setUsuarios(usuarios.filter((usuario) => usuario.id_usuario !== id));
+            alertify.success('Usuario eliminado correctamente');
+          } else {
+            const result = await response.json();
+            const errorMessage = result.message || 'Error al eliminar el usuario';
+            if (errorMessage.includes('violates foreign key constraint')) {
+              alertify.error('El usuario no puede ser eliminado, está relacionado con otras tablas');
+            } else {
+              alertify.error(errorMessage);
+            }
+          }
+        } catch (error) {
+          console.error('Error al eliminar usuario:', error);
+          alertify.error('Error al eliminar el usuario');
+        }
+      },
+      function () {
+        alertify.error('Cancelado');
       });
-      setUsuarios(usuarios.filter((usuario) => usuario.id_usuario !== id));
-    } catch (error) {
-      console.error('Error al eliminar usuario:', error);
-    }
   };
 
   const handleOpen = (id = null) => {
@@ -144,9 +164,9 @@ function UsuarioList() {
                       variant="contained"
                       sx={{
                         backgroundColor: '#FFA000',
-                        color: 'white', // Cambia el color del texto si es necesario
+                        color: 'white',
                         '&:hover': {
-                          backgroundColor: '#FFA001' // Color al hacer hover
+                          backgroundColor: '#FFA001'
                         }
                       }}
                       onClick={() => handleOpen(usuario.id_usuario)}

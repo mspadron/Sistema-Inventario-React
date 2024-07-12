@@ -92,6 +92,9 @@ const Navbar = () => {
         { text: 'Categorías', icon: <CategoryIcon />, link: '/dashCategoria' },
         { text: 'Productos', icon: <ProductionQuantityLimitsIcon />, link: '/dashProducto' },
         { text: 'Existencias', icon: <Assignment />, link: '/dashExistencia' },
+        { text: 'Entradas', icon: <InputIcon />, link: '/dashEntrada' },
+        { text: 'Salidas', icon: <OutputIcon />, link: '/dashSalida' },
+        { text: 'Existencias Mínimas', icon: <ReportIcon />, link: '/reporteMinExis' }
       );
     } else if (tipoUsuario === '2') {
       menuItems.push(
