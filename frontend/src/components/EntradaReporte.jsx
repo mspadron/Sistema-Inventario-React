@@ -49,9 +49,27 @@ const EntradaReporte = () => {
     try {
       const response = await fetch('http://localhost:4000/entradas');
       const data = await response.json();
-      setEntradas(data.entradas);
+      if (Array.isArray(data.entradas)) {
+        const entradasUnicas = data.entradas.reduce((acc, entrada) => {
+          const found = acc.find(
+            (e) => e.id_entrada === entrada.id_entrada
+          );
+          if (found) {
+            found.gestionada_por += `, ${entrada.gestionada_por}`;
+          } else {
+            acc.push({
+              ...entrada,
+              gestionada_por: entrada.gestionada_por
+            });
+          }
+          return acc;
+        }, []);
+        setEntradas(entradasUnicas);
+      } else {
+        console.error('Los datos de entradas no son un array:', data);
+      }
     } catch (error) {
-      console.error('Error fetching entradas:', error);
+      console.error('Error al cargar entradas:', error);
     }
   };
 

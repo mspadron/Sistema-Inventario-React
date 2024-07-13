@@ -49,7 +49,25 @@ const SalidaReporte = () => {
     try {
       const response = await fetch('http://localhost:4000/salidas');
       const data = await response.json();
-      setSalidas(data.salidas);
+      if (Array.isArray(data.salidas)) {
+        const salidasUnicas = data.salidas.reduce((acc, salida) => {
+          const found = acc.find(
+            (e) => e.id_salida === salida.id_salida
+          );
+          if (found) {
+            found.gestionada_por += `, ${salida.gestionada_por}`;
+          } else {
+            acc.push({
+              ...salida,
+              gestionada_por: salida.gestionada_por
+            });
+          }
+          return acc;
+        }, []);
+        setSalidas(salidasUnicas);
+      } else {
+        console.error('Los datos de salidas no son un array:', data);
+      }
     } catch (error) {
       console.error('Error fetching salidas:', error);
     }

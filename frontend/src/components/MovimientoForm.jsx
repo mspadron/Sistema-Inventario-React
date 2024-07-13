@@ -7,13 +7,30 @@ import {
   Grid,
   TextField
 } from '@mui/material';
+import alertify from 'alertifyjs';
+import 'alertifyjs/build/css/alertify.css';
+import 'alertifyjs/build/css/themes/default.css';
 
 function MovimientoForm({ existencia, onClose, onMovement, tipo }) {
   const [cantidad, setCantidad] = useState('');
   const [loading, setLoading] = useState(false);
 
+  const validateForm = () => {
+    if (!cantidad) {
+      alertify.error('El campo cantidad no debe estar vacío');
+      return false;
+    }
+    if (!/^\d+$/.test(cantidad)) {
+      alertify.error('El campo cantidad solo admite números enteros');
+      return false;
+    }
+    return true;
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
+    if (!validateForm()) return;
+
     setLoading(true);
     const url =
       tipo === 'entrada'
@@ -39,12 +56,20 @@ function MovimientoForm({ existencia, onClose, onMovement, tipo }) {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(payload)
       });
-      await response.json();
-      setLoading(false);
-      onMovement();
-      onClose();
+      if (response.ok) {
+        await response.json();
+        alertify.success(`Movimiento de ${tipo} registrado con éxito`);
+        onMovement();
+        onClose();
+      } else {
+        const result = await response.json();
+        const errorMessage = result.message || 'Error al realizar el movimiento';
+        alertify.error(errorMessage);
+      }
     } catch (error) {
       console.error('Error al realizar el movimiento:', error);
+      alertify.error('Error al realizar el movimiento');
+    } finally {
       setLoading(false);
     }
   };

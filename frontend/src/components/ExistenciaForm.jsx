@@ -8,6 +8,9 @@ import {
   MenuItem
 } from '@mui/material';
 import { useState, useEffect } from 'react';
+import alertify from 'alertifyjs';
+import 'alertifyjs/build/css/alertify.css';
+import 'alertifyjs/build/css/themes/default.css';
 
 function ExistenciaForm({ onClose, onSave }) {
   const [existencia, setExistencia] = useState({
@@ -15,7 +18,6 @@ function ExistenciaForm({ onClose, onSave }) {
     id_producto: '',
     id_proveedor: '',
     stockinicial_existencia: '',
-    // stockactual_existencia se calcula automáticamente
     preciocompra_existencia: '',
     precioventa_existencia: ''
   });
@@ -83,8 +85,51 @@ function ExistenciaForm({ onClose, onSave }) {
     fetchProveedores();
   }, []);
 
+  const validateForm = () => {
+    const {
+      id_categoria,
+      id_proveedor,
+      id_producto,
+      stockinicial_existencia,
+      preciocompra_existencia,
+      precioventa_existencia
+    } = existencia;
+
+    if (!id_categoria) {
+      alertify.error('Debe seleccionar una categoría');
+      return false;
+    }
+    if (!id_producto) {
+      alertify.error('Debe seleccionar un producto');
+      return false;
+    }
+    if (!id_proveedor) {
+      alertify.error('Debe seleccionar un proveedor');
+      return false;
+    }
+
+    if (!/^\d+$/.test(stockinicial_existencia)) {
+      alertify.error('El campo stock inicial solo admite números enteros y no debe estar vacío');
+      return false;
+    }
+
+    if (!/^\d+(\.\d+)?$/.test(preciocompra_existencia)) {
+      alertify.error('El campo precio compra solo admite números y números flotantes con punto decimal y no debe estar vacío');
+      return false;
+    }
+
+    if (!/^\d+(\.\d+)?$/.test(precioventa_existencia)) {
+      alertify.error('El campo precio venta solo admite números y números flotantes con punto decimal y no debe estar vacío');
+      return false;
+    }
+
+    return true;
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
+    if (!validateForm()) return;
+
     setLoading(true);
     try {
       const response = await fetch('http://localhost:4000/existencias', {
@@ -96,12 +141,20 @@ function ExistenciaForm({ onClose, onSave }) {
           id_usuario: usuarioId // Incluir el ID del usuario en el cuerpo de la solicitud
         })
       });
-      await response.json();
-      setLoading(false);
-      onSave();
-      onClose();
+      if (response.ok) {
+        alertify.success('Existencia creada correctamente');
+        await response.json();
+        onSave();
+        onClose();
+      } else {
+        const result = await response.json();
+        const errorMessage = result.message || 'Error al guardar la existencia';
+        alertify.error(errorMessage);
+      }
     } catch (error) {
       console.error(error);
+      alertify.error('Error al guardar la existencia');
+    } finally {
       setLoading(false);
     }
   };
@@ -123,7 +176,7 @@ function ExistenciaForm({ onClose, onSave }) {
             <Grid item xs={12} md={6}>
               <TextField
                 variant="filled"
-                label="Categoria"
+                label="Categoría"
                 fullWidth
                 select
                 sx={{ marginBottom: '1rem' }}
